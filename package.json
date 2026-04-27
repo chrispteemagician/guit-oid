@@ -1,0 +1,11 @@
+{
+  "name": "guit-oid",
+  "version": "1.0.0",
+  "description": "Guitar Authentication AI - Part of FeelFamous Ecosystem",
+  "main": "index.html",
+  "scripts": {
+    "start": "netlify dev"
+  },
+  "author": "Chris P Tee",
+  "license": "MIT"
+}

@@ -1,0 +1,35 @@
+functionsDirectory = "C:\\Users\\comed\\Desktop\\a1\\guit-oid-FINAL\\guit-oid\\netlify\\functions"
+functionsDirectoryOrigin = "config-v1"
+headersOrigin = "config"
+plugins = []
+redirects = []
+
+[build]
+publish = "C:\\Users\\comed\\Desktop\\a1\\guit-oid-FINAL\\guit-oid"
+publishOrigin = "config"
+functions = "C:\\Users\\comed\\Desktop\\a1\\guit-oid-FINAL\\guit-oid\\netlify\\functions"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions."*"]
+node_bundler = "esbuild"
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+Access-Control-Allow-Origin = "*"

@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>The Guitar Workshop | Guit-Oid — Fretboard Fred's Guitar World</title>
+    <meta name="description" content="Fretboard Fred's Guitar Workshop. Guitar authentication meets repair wisdom. Identify guitars, learn the craft, ask anything. Free forever.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        #__tailwind_container, .tailwind-indicator { display: none !important; }
+        [data-tw-portal] > *:not([id]) { display: none !important; }
+
+        :root {
+            --deep: #78350f;
+            --mid: #92400e;
+            --accent: #d97706;
+            --highlight: #fbbf24;
+            --gold: #fbbf24;
+            --abyss: #451a03;
+            --foam: #fffbeb;
+            --sand: #fef3c7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; font-size: 18px; }
+        body { font-family: 'Outfit', sans-serif; background: var(--abyss); color: #e2e8f0; }
+        .font-hand { font-family: 'Caveat', cursive; }
+
+        .text-xs { font-size: 0.8rem !important; }
+        .text-sm { font-size: 0.9rem !important; }
+
+        .string-bg {
+            background: linear-gradient(180deg, #451a03 0%, #78350f 40%, #92400e 70%, #7c2d12 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .string-bg::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 200%;
+            height: 40px;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20 Q150 0 300 20 T600 20 T900 20 T1200 20 V40 H0 Z' fill='%23451a03'/%3E%3C/svg%3E") repeat-x;
+            animation: strings 8s linear infinite;
+        }
+        @keyframes strings { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .workshop-card {
+            background: linear-gradient(135deg, rgba(146,64,14,0.12) 0%, rgba(217,119,6,0.06) 100%);
+            border: 1px solid rgba(217,119,6,0.2);
+            border-left: 4px solid var(--accent);
+            transition: all 0.3s;
+        }
+        .workshop-card:hover {
+            border-color: var(--highlight);
+            background: linear-gradient(135deg, rgba(146,64,14,0.2) 0%, rgba(217,119,6,0.1) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(217,119,6,0.15);
+        }
+
+        .upload-box {
+            background: rgba(217,119,6,0.08);
+            border: 2px dashed rgba(217,119,6,0.3);
+            border-radius: 16px;
+            padding: 48px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 48px;
+        }
+        .upload-box:hover {
+            background: rgba(217,119,6,0.15);
+            border-color: var(--accent);
+        }
+
+        .tab-active { background: var(--mid); color: white; font-weight: bold; }
+        .tab-inactive { background: transparent; color: var(--accent); font-weight: 600; border: 1px solid rgba(217,119,6,0.3); }
+        .tab-inactive:hover { background: rgba(217,119,6,0.1); }
+
+        .learn-tab-active { background: var(--mid); color: white; font-weight: bold; border-radius: 12px; }
+        .learn-tab-inactive { background: transparent; color: var(--highlight); font-weight: 600; border-radius: 12px; }
+        .learn-tab-inactive:hover { background: rgba(217,119,6,0.1); }
+
+        .chat-container { background: var(--abyss); border: 1px solid rgba(217,119,6,0.3); border-radius: 16px; overflow: hidden; }
+        .chat-messages { height: 400px; overflow-y: auto; padding: 16px; scroll-behavior: smooth; }
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(217,119,6,0.3); border-radius: 3px; }
+        .msg-fred {
+            background: linear-gradient(135deg, #78350f, #7c2d12);
+            border-radius: 16px 16px 16px 4px;
+            max-width: 85%;
+        }
+        .msg-user {
+            background: linear-gradient(135deg, #92400e, #b45309);
+            border-radius: 16px 16px 4px 16px;
+            max-width: 85%;
+            margin-left: auto;
+        }
+
+        .qa-item { border-bottom: 1px solid rgba(217,119,6,0.15); }
+        .qa-question { cursor: pointer; transition: all 0.2s; min-height: 48px; display: flex; align-items: center; }
+        .qa-question:hover { color: var(--highlight); }
+        .qa-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .qa-answer.open { max-height: 600px; padding-bottom: 16px; }
+
+        .typing-dots span {
+            display: inline-block; width: 8px; height: 8px;
+            background: var(--accent); border-radius: 50%; margin: 0 2px; animation: bounce 1.4s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } }
+
+        .note-float { position: absolute; animation: noteUp linear infinite; font-size: 18px; }
+        @keyframes noteUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+            100% { transform: translateY(-300px) rotate(20deg); opacity: 0; }
+        }
+
+        .section-fade { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+        .section-fade.visible { opacity: 1; transform: translateY(0); }
+
+        .dot-nav { position: fixed; right: 12px; top: 50%; transform: translateY(-50%); z-index: 40; display: flex; flex-direction: column; gap: 10px; }
+        .dot-nav a { width: 12px; height: 12px; border-radius: 50%; background: rgba(217,119,6,0.3); transition: all 0.3s; display: block; }
+        .dot-nav a.active { background: var(--highlight); transform: scale(1.3); }
+        .dot-nav a:hover { background: var(--accent); }
+
+        button, a, .upload-box { min-height: 48px; }
+
+        @media (max-width: 640px) {
+            .chat-messages { height: 300px; }
+            .dot-nav { display: none; }
+            html { font-size: 16px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+        :focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+    </style>
+</head>
+<body>
+
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-amber-600 text-white px-4 py-2 rounded z-50">Skip to main content</a>
+
+    <nav class="dot-nav" aria-label="Section navigation">
+        <a href="#pageHome" title="Home" class="active"></a>
+        <a href="#pageLearn" title="Learn"></a>
+        <a href="#pageQA" title="Q&A"></a>
+        <a href="#pageFred" title="Ask Fretboard Fred"></a>
+        <a href="#pageGear" title="Gear"></a>
+        <a href="#pageMeet" title="Meet"></a>
+        <a href="#pageVillage" title="Village"></a>
+    </nav>
+
+    <div id="ageModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
+        <div class="rounded-3xl p-8 max-w-md border border-amber-800/30" style="background:#78350f;">
+            <div class="text-center text-4xl mb-3">&#127928;</div>
+            <h2 class="text-2xl font-bold text-white mb-4 text-center">Welcome to The Guitar Workshop</h2>
+            <p class="text-amber-200 mb-6 text-center">This is an adult-focused educational community. Kids are welcome with parent permission.</p>
+            <div class="space-y-3">
+                <button onclick="confirmAge('adult')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition">I'm 18+ (Continue)</button>
+                <button onclick="confirmAge('parent')" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-xl transition">I'm a Parent/Guardian</button>
+                <button onclick="confirmAge('under18')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition">I'm Under 18 (Need Parent OK)</button>
+            </div>
+            <p class="text-xs text-amber-500 mt-6 text-center">We're building a safe space for skill-sharing across generations. No social media BS. Just real humans helping real humans.</p>
+        </div>
+    </div>
+
+    <header id="pageHome" class="string-bg text-center py-16 px-4 relative min-h-[50vh] flex items-center justify-center">
+        <div class="note-float" style="left:10%;bottom:20%;animation-duration:6s;">&#9835;</div>
+        <div class="note-float" style="left:30%;bottom:10%;animation-duration:8s;animation-delay:1s;">&#9834;</div>
+        <div class="note-float" style="left:60%;bottom:15%;animation-duration:7s;animation-delay:2s;">&#9833;</div>
+        <div class="note-float" style="left:80%;bottom:25%;animation-duration:9s;animation-delay:0.5s;">&#9835;</div>
+        <div class="note-float" style="left:45%;bottom:5%;animation-duration:6.5s;animation-delay:3s;">&#9834;</div>
+
+        <div class="max-w-3xl mx-auto relative z-10">
+            <div class="text-7xl mb-4">&#127928;</div>
+            <h1 class="text-5xl md:text-7xl font-black text-white mb-2 tracking-tight">Guit-Oid</h1>
+            <p class="text-xl text-amber-300 font-semibold mb-1">The Guitar Workshop</p>
+            <p class="font-hand text-2xl text-amber-300">"If it's got strings and a story, I want to hear both."</p>
+            <p class="text-amber-400 text-sm mt-4 max-w-lg mx-auto">A FeelFamous Village for guitar players, collectors, repair nerds, and anyone who's ever wondered what that old guitar in the attic is really worth.</p>
+
+            <div class="mt-8 flex flex-wrap gap-3 justify-center">
+                <a href="#pageLearn" class="bg-amber-700 hover:bg-amber-800 text-white px-5 py-3 rounded-xl font-semibold transition text-sm">&#127925; Learn</a>
+                <a href="#pageFred" class="bg-yellow-700 hover:bg-yellow-800 text-white px-5 py-3 rounded-xl font-semibold transition text-sm">&#128295; Ask Fred</a>
+                <a href="https://buymeacoffee.com/chrispteemagician" target="_blank" class="bg-amber-500 hover:bg-amber-600 text-black px-5 py-3 rounded-xl font-bold transition text-sm">&#9749; Buy a Cuppa</a>
+                <a href="https://www.patreon.com/chrisptee" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-semibold transition text-sm" aria-label="Join on Patreon">Join on Patreon</a>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-[#451a03] border-b border-amber-900/50 sticky top-0 z-40" aria-label="Main navigation">
+        <div class="max-w-4xl mx-auto px-4 flex gap-1 overflow-x-auto py-2 text-sm">
+            <a href="#pageHome" class="whitespace-nowrap px-3 py-2 rounded-lg bg-amber-600/20 text-amber-300 hover:bg-amber-600/30 transition font-semibold">&#127928; Home</a>
+            <a href="#pageLearn" class="whitespace-nowrap px-3 py-2 rounded-lg text-amber-400 hover:bg-amber-600/20 transition">&#127925; Learn</a>
+            <a href="#pageQA" class="whitespace-nowrap px-3 py-2 rounded-lg text-amber-400 hover:bg-amber-600/20 transition">&#127926; Q&amp;A</a>
+            <a href="#pageFred" class="whitespace-nowrap px-3 py-2 rounded-lg text-amber-400 hover:bg-amber-600/20 transition font-semibold">&#128295; Fred</a>
+            <a href="#pageGear" class="whitespace-nowrap px-3 py-2 rounded-lg text-amber-400 hover:bg-amber-600/20 transition">&#129693; Gear</a>
+            <a href="#pageMeet" class="whitespace-nowrap px-3 py-2 rounded-lg text-amber-400 hover:bg-amber-600/20 transition">📍 Meet</a>
+            <a href="#pageVillage" class="whitespace-nowrap px-3 py-2 rounded-lg text-amber-400 hover:bg-amber-600/20 transition">&#127960;&#65039; Village</a>
+        </div>
+    </nav>
+
+    <div class="bg-amber-900/30 text-center py-3 px-4 border-b border-amber-900/30">
+        <p class="text-sm text-amber-200">
+            <strong>Free forever.</strong> Identify, learn, ask. Join the
+            <a href="https://feelfamous.com" class="text-amber-400 font-bold hover:text-amber-300 transition">FeelFamous Family</a>
+            to unlock <span class="bg-amber-500 text-black px-2 py-0.5 rounded font-bold text-xs">PRO</span> features across ALL -Oid apps.
+        </p>
+    </div>
+
+    <div id="userStatusBar" class="hidden bg-gradient-to-r from-amber-500 to-yellow-500 text-black py-2 px-4">
+        <div class="max-w-4xl mx-auto flex items-center justify-between text-sm">
+            <div class="font-bold"><span id="userBadge"></span> <span id="userName"></span> - <span id="userKudos">0</span> Kudos</div>
+            <button onclick="signOut()" class="text-xs underline">Sign out</button>
+        </div>
+    </div>
+
+    <main id="main" class="max-w-4xl mx-auto px-4 py-8">
+
+        <section class="section-fade mb-12">
+            <div class="bg-gradient-to-br from-amber-900/40 to-yellow-900/20 rounded-2xl p-8 border border-amber-800/30">
+                <div class="flex items-start gap-4">
+                    <div class="text-5xl">&#127928;</div>
+                    <div>
+                        <h2 class="text-2xl font-black text-white mb-2">Fred's Workshop</h2>
+                        <p class="text-amber-200 leading-relaxed mb-4">Alright! I'm Fretboard Fred -- been setting up, repairing, and obsessing over guitars since I was 14. Worked backstage at festivals, ran my own repair shop in Camden, and now I fix guitars from my garage. 44 years of sawdust and solder. My '72 Tele Deluxe is the love of my life -- don't tell the wife.</p>
+                        <p class="text-amber-300 text-sm">Whether you've found a guitar in the attic, scored one at a car boot, or you just want to know if that eBay bargain is real or a Chinese copy -- ask away. I've got coffee on and a workbench full of stories. No question too daft, no guitar too cheap.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-fade mb-12">
+            <h2 class="text-3xl font-black text-white mb-2">&#127928; Guit-Oid AI</h2>
+            <p class="text-amber-400 mb-6">Snap a photo. Fred identifies it. Guitars, amps, pedals, pickups -- anything with strings or a signal.</p>
+
+            <div class="flex gap-2 mb-6">
+                <button id="identifyTab" onclick="switchTab('identify')" class="flex-1 py-3 rounded-xl tab-active transition font-semibold">&#127928; Identify</button>
+                <button id="roastTab" onclick="switchTab('roast')" class="flex-1 py-3 rounded-xl tab-inactive transition font-semibold">&#128293; Roast My Guitar</button>
+            </div>
+
+            <div id="identifyView">
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="upload-box" onclick="document.getElementById('cameraInput').click()">
+                        <div class="text-5xl mb-3">&#128247;</div>
+                        <p class="font-bold text-white">Camera</p>
+                        <p class="text-amber-400 text-xs mt-1">Take a photo</p>
+                    </div>
+                    <div class="upload-box" onclick="document.getElementById('galleryInput').click()">
+                        <div class="text-5xl mb-3">&#128444;&#65039;</div>
+                        <p class="font-bold text-white">Gallery</p>
+                        <p class="text-amber-400 text-xs mt-1">Choose a photo</p>
+                    </div>
+                </div>
+                <p class="text-center text-amber-500 text-sm mb-6">Guitars, amps, pedals, pickups -- Fred's seen it all.</p>
+                <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleUpload('identify', this)">
+                <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleUpload('identify', this)">
+            </div>
+
+            <div id="roastView" class="hidden">
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="upload-box" onclick="document.getElementById('roastCamera').click()">
+                        <div class="text-5xl mb-3">&#128247;</div>
+                        <p class="font-bold text-white">Camera</p>
+                    </div>
+                    <div class="upload-box" onclick="document.getElementById('roastGallery').click()">
+                        <div class="text-5xl mb-3">&#128444;&#65039;</div>
+                        <p class="font-bold text-white">Gallery</p>
+                    </div>
+                </div>
+                <p class="text-center text-amber-500 text-sm">Show me your guitar or your rig. Prepare for honest Camden opinions.</p>
+                <input type="file" id="roastCamera" accept="image/*" capture="environment" class="hidden" onchange="handleUpload('roast', this)">
+                <input type="file" id="roastGallery" accept="image/*" class="hidden" onchange="handleUpload('roast', this)">
+            </div>
+
+            <div id="loadingView" class="hidden text-center py-12">
+                <div class="animate-spin text-7xl mb-4">&#127928;</div>
+                <p id="loadingTitle" class="text-2xl font-bold text-amber-400">Tuning up...</p>
+                <p id="loadingMessage" class="text-amber-500 mt-2">Checking the serial numbers...</p>
+                <p class="text-amber-700 text-sm mt-4 italic">"Patience is a virtue -- especially when you're waiting for the neck to settle."</p>
+                <p class="text-amber-700 text-xs mt-2">This can take up to 30 seconds for an accurate result</p>
+                <div id="loadingTimer" class="text-amber-400 font-mono text-lg mt-3"></div>
+            </div>
+
+            <div id="resultView" class="hidden">
+                <div class="rounded-3xl p-8 text-white shadow-2xl mb-6" style="background: linear-gradient(135deg, #92400e 0%, #b45309 100%);">
+                    <img id="resultImage" src="" alt="Result" class="w-full rounded-xl mb-6 shadow-xl">
+                    <h3 id="resultTitle" class="text-3xl font-extrabold mb-3"></h3>
+                    <div id="resultDescription" class="text-lg opacity-90 mb-4 whitespace-pre-wrap"></div>
+                    <p id="resultPrice" class="text-yellow-300 font-bold text-xl hidden"></p>
+                    <div id="amazonLink" class="hidden mt-4">
+                        <a id="amazonBtn" href="" target="_blank" class="block text-center bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-xl transition">&#127928; Find on Amazon</a>
+                    </div>
+                    <p id="resultAttribution" class="text-sm opacity-75 mt-4"></p>
+                </div>
+
+                <div class="grid grid-cols-4 gap-3 mb-6">
+                    <button onclick="downloadResult()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl transition text-sm">Save</button>
+                    <button onclick="shareResult()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition text-sm">Share</button>
+                    <a href="https://www.spicylister.com" target="_blank" class="bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition text-sm text-center flex items-center justify-center">Sell</a>
+                    <button onclick="resetToHome()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-xl transition text-sm">Again</button>
+                </div>
+
+                <div id="signInPrompt" class="bg-[#451a03] border-2 border-amber-700 rounded-2xl p-6 text-center">
+                    <p class="text-amber-200 font-semibold mb-2">Sign in to earn kudos, track your identifications, and unlock village features!</p>
+                    <p class="text-sm text-amber-500 mb-4">One login — works across every -Oid app.</p>
+                    <button id="patreonSignInBtn" onclick="signInWithPatreon()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-xl transition" style="min-height:52px; font-size:1.05rem;" aria-label="Sign in with Patreon">Sign in with Patreon</button>
+                    <div id="patreonStatus" class="hidden mt-3" role="status" aria-live="polite"></div>
+                    <p class="text-xs text-amber-600 mt-3">Secure OAuth. No passwords stored here.</p>
+                </div>
+
+                <div id="kudosEarned" class="hidden bg-amber-900/20 border-2 border-amber-500 rounded-2xl p-6 text-center mt-4">
+                    <p class="text-2xl font-bold text-white mb-2">+10 Kudos Earned! &#127928;</p>
+                    <p class="text-sm text-amber-300">Share your QR code to earn even more!</p>
+                </div>
+            </div>
+
+            <div id="broadcastSection" class="hidden mt-6">
+                <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; border-radius: 16px; overflow: hidden; max-width: 320px; margin: 0 auto;">
+                    <div id="emergencyBanner" class="hidden bg-red-600 text-white text-center py-2 font-bold text-sm">EMERGENCY BROADCAST</div>
+                    <div class="p-3">
+                        <p class="font-bold text-xs mb-2 opacity-80" id="broadcastTitle">Village Broadcast</p>
+                        <div class="relative" style="padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px;">
+                            <iframe id="broadcastVideo" src="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-amber-900/20 rounded-2xl border border-amber-800/30 p-6 mt-8">
+                <h3 class="font-bold text-white mb-4">&#127928; Recent Villagers</h3>
+                <div id="activityList" class="space-y-2 text-sm text-amber-300">
+                    <p class="text-center text-amber-600">Loading...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="pageLearn" class="section-fade mb-12">
+            <h2 class="text-3xl font-black text-white mb-2">&#127928; Learn the Craft</h2>
+            <p class="text-amber-400 mb-6">Fred's workshop notes. No jargon without translation.</p>
+
+            <div class="flex gap-2 mb-6 flex-wrap">
+                <button onclick="switchLearnTab('guitarid')" id="learnTab1" class="learn-tab-active px-4 py-2 transition text-sm">&#127928; Guitar ID Tips</button>
+                <button onclick="switchLearnTab('basics')" id="learnTab2" class="learn-tab-inactive px-4 py-2 transition text-sm">&#128295; Setup Basics</button>
+                <button onclick="switchLearnTab('fakes')" id="learnTab3" class="learn-tab-inactive px-4 py-2 transition text-sm">&#128737;&#65039; Spotting Fakes</button>
+            </div>
+
+            <div id="learnGuitarid">
+                <h3 class="text-xl font-bold text-amber-400 mb-4">&#127928; How to Identify a Guitar</h3>
+                <p class="text-amber-200 text-sm mb-4">Fretboard Fred's quick-reference guide. Look at these features in order:</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                    <div class="bg-amber-900/30 rounded-lg p-4 border border-amber-800/30">
+                        <p class="font-bold text-white">Body Shape</p>
+                        <p class="text-amber-300 text-sm">Strat? Tele? Les Paul? SG? Offset? Shape tells you the family immediately.</p>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-lg p-4 border border-amber-800/30">
+                        <p class="font-bold text-white">Headstock Shape</p>
+                        <p class="text-amber-300 text-sm">Every brand has a signature headstock. Fender, Gibson, PRS -- the head never lies.</p>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-lg p-4 border border-amber-800/30">
+                        <p class="font-bold text-white">Pickup Types</p>
+                        <p class="text-amber-300 text-sm">Single coil, humbucker, P90, mini-humbucker. Configuration tells you the era and model.</p>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-lg p-4 border border-amber-800/30">
+                        <p class="font-bold text-white">Serial Numbers</p>
+                        <p class="text-amber-300 text-sm">On the headstock, neck plate, or inside the body. The DNA of every guitar.</p>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-lg p-4 border border-amber-800/30">
+                        <p class="font-bold text-white">Bridge Type</p>
+                        <p class="text-amber-300 text-sm">Tune-o-matic, tremolo, hardtail, Floyd Rose. Narrows down the model fast.</p>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-lg p-4 border border-amber-800/30">
+                        <p class="font-bold text-white">Tuner Types</p>
+                        <p class="text-amber-300 text-sm">Kluson, Grover, locking, vintage-style. Tuners date a guitar better than most features.</p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-amber-900/40 to-yellow-900/20 rounded-xl p-6 border border-amber-800/30">
+                    <h4 class="font-bold text-white mb-3">Classic Guitars -- Quick Reference</h4>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        <div class="text-amber-200"><strong class="text-white">Fender Stratocaster</strong> -- Contoured double-cutaway, 3 single coils, tremolo bridge. The most copied guitar in history.</div>
+                        <div class="text-amber-200"><strong class="text-white">Gibson Les Paul</strong> -- Single-cutaway, carved maple top, 2 humbuckers, tune-o-matic bridge. Rock's workhorse since 1952.</div>
+                        <div class="text-amber-200"><strong class="text-white">Fender Telecaster</strong> -- Slab body, 2 single coils, through-body stringing. The original solid-body electric.</div>
+                        <div class="text-amber-200"><strong class="text-white">Gibson SG</strong> -- Double-cutaway, thin body, 2 humbuckers. Lighter than a Les Paul, plays like a dream.</div>
+                        <div class="text-amber-200"><strong class="text-white">PRS Custom 24</strong> -- Double-cutaway, 24 frets, bird inlays, tremolo. Modern classic since 1985.</div>
+                        <div class="text-amber-200"><strong class="text-white">Martin D-28</strong> -- Dreadnought acoustic, rosewood back and sides, spruce top. The gold standard of flat-tops.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="learnBasics" class="hidden">
+                <h3 class="text-xl font-bold text-amber-400 mb-4">&#128295; Setup Basics</h3>
+                <div class="space-y-4">
+                    <div class="bg-amber-900/30 rounded-xl p-6 border border-amber-800/30">
+                        <h4 class="font-bold text-white mb-2">String Height (Action)</h4>
+                        <p class="text-amber-200 text-sm mb-3">Action is the distance between strings and frets. Too high and it's hard to play. Too low and you get fret buzz. Most players want about 2mm at the 12th fret on the treble side, 2.5mm on the bass side. Measure with a ruler or action gauge.</p>
+                        <p class="text-amber-300 text-sm"><strong>How to adjust:</strong> On a Strat, raise or lower the saddle screws. On a Les Paul, turn the thumbwheels on the bridge posts. Small turns -- quarter turns at a time.</p>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-xl p-6 border border-amber-800/30">
+                        <h4 class="font-bold text-white mb-2">Truss Rod</h4>
+                        <p class="text-amber-200 text-sm mb-3">The truss rod controls neck relief -- the slight bow in the neck. Too much bow = high action in the middle frets. Too flat = fret buzz everywhere. You want a tiny amount of relief -- about 0.2mm at the 8th fret when holding the string at frets 1 and 17.</p>
+                        <p class="text-amber-300 text-sm"><strong>Warning:</strong> Quarter turns only. Let the neck settle overnight between adjustments. If you're not confident, take it to a tech. Snapping a truss rod is an expensive mistake.</p>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-xl p-6 border border-amber-800/30">
+                        <h4 class="font-bold text-white mb-2">Intonation</h4>
+                        <p class="text-amber-200 text-sm mb-3">If your guitar is in tune on open strings but sharp or flat at the 12th fret, your intonation is off. Compare the 12th fret note to the 12th fret harmonic. If the fretted note is sharp, move the saddle back (longer string). If flat, move it forward.</p>
+                        <p class="text-amber-300 text-sm"><strong>Tip:</strong> Always set intonation AFTER adjusting action and truss rod. New strings, tuned up, then intonate.</p>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-xl p-6 border border-amber-800/30">
+                        <h4 class="font-bold text-white mb-2">Pickup Height &amp; Cleaning</h4>
+                        <div class="grid md:grid-cols-2 gap-3 text-sm text-amber-200">
+                            <div><strong class="text-white">Pickup Height:</strong> Start at 3mm from the string (last fret held) for humbuckers, 2.5mm for single coils. Too close = magnetic pull throws tuning off. Too far = weak signal.</div>
+                            <div><strong class="text-white">Cleaning:</strong> Lemon oil on rosewood fretboards (NOT maple). Polish body with guitar-specific polish. Clean strings after playing to triple their life. WD-40 on rusty hardware -- but keep it off the wood.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="learnFakes" class="hidden">
+                <h3 class="text-xl font-bold text-red-400 mb-4">&#128737;&#65039; Spotting Fakes -- Fred's Guide</h3>
+                <div class="bg-red-900/20 rounded-xl p-6 border border-red-800/30 mb-4">
+                    <p class="text-white font-bold mb-3">Fred's Rule: If the price seems too good to be true, it is.</p>
+                    <p class="text-amber-200 text-sm mb-4">Chinese copies have got scary good in the last 10 years. I've seen fakes that fooled shop owners. But there are always tells if you know where to look. Here's what I check every single time.</p>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-amber-900/30 rounded-xl p-6 border border-amber-800/30">
+                        <h4 class="font-bold text-white mb-2">Logo &amp; Headstock</h4>
+                        <div class="text-amber-200 text-sm space-y-2">
+                            <p>-- Check the font. Fakes often get the lettering slightly wrong -- spacing, thickness, shape.</p>
+                            <p>-- On Gibsons, the "i" in Gibson should NOT dot. It's an open-top "i".</p>
+                            <p>-- Fender logos: check the spacing between letters, especially the "F" spaghetti logo on vintage models.</p>
+                            <p>-- Look for sloppy inlay work. Real pearl inlays have natural variation. Plastic ones look too perfect.</p>
+                        </div>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-xl p-6 border border-amber-800/30">
+                        <h4 class="font-bold text-white mb-2">Serial Numbers &amp; Hardware</h4>
+                        <div class="text-amber-200 text-sm space-y-2">
+                            <p>-- Serial numbers should be consistent with the era. Google the serial number format for the brand.</p>
+                            <p>-- Cheap tuners are the biggest giveaway. Real Grovers and Klusons have weight and precision.</p>
+                            <p>-- Check the bridge. Genuine tune-o-matics have clean casting. Fakes have rough edges and thin plating.</p>
+                            <p>-- Weigh the guitar. Genuine Les Pauls are HEAVY (8-10 lbs). Fakes are often lighter -- cheaper wood.</p>
+                        </div>
+                    </div>
+                    <div class="bg-amber-900/30 rounded-xl p-6 border border-amber-800/30">
+                        <h4 class="font-bold text-white mb-2">The Detail Test</h4>
+                        <div class="text-amber-200 text-sm space-y-2">
+                            <p>-- Look inside the control cavity. Real guitars have neat wiring. Fakes have messy solder and cheap pots.</p>
+                            <p>-- Check the neck pocket (bolt-on guitars). It should be tight, clean, and have a date stamp or initials.</p>
+                            <p>-- Fret ends: real quality guitars have smooth, rolled fret ends. Fakes have sharp, scratchy frets.</p>
+                            <p>-- Smell the case. Sounds mad, but Chinese fake cases have a distinct chemical smell that takes months to fade.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="pageQA" class="section-fade mb-12">
+            <h2 class="text-3xl font-black text-white mb-1">&#127925; Common Questions</h2>
+            <p class="font-hand text-xl text-amber-300 mb-6">"If it's got frets and a question mark, I'm your man." -- Fretboard Fred</p>
+
+            <div class="bg-amber-900/20 rounded-2xl border border-amber-800/30 overflow-hidden">
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">How do I know if my guitar is real or fake?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">Check the serial number first -- Google the format for your brand. Gibson serials are on the back of the headstock. Fender serials are on the headstock front, neck plate, or heel. Then look at the details: logo font, tuner quality, fret finish, binding, and the weight. Chinese copies are lighter, have rough hardware, and the inlays look too uniform. Check the neck pocket for stamps. Open the electronics cavity -- real guitars have clean wiring, fakes have cheap pots and sloppy solder. When in doubt, snap a photo and use the <a href="#pageHome" class="text-amber-400 hover:text-amber-300 underline">Guit-Oid AI</a> above.</div>
+                </div>
+
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">What's a guitar setup and do I need one?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">A setup is adjusting the action (string height), truss rod (neck relief), intonation (tuning accuracy up the neck), and pickup height. Every guitar needs one eventually -- wood moves with temperature and humidity. A new guitar from a shop SHOULD be set up, but often isn't. If your guitar buzzes, feels hard to play, or won't stay in tune past the 5th fret, it needs a setup. A good tech charges 30-50 quid and it transforms the playability. Or learn to do it yourself -- the <a href="#pageLearn" class="text-amber-400 hover:text-amber-300 underline">Learn section</a> above has the basics.</div>
+                </div>
+
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">Is my old guitar worth anything?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">Maybe! It depends on brand, model, year, condition, and originality. A 1960s Fender or Gibson in original condition can be worth thousands. But a 1990s Squier might be worth 80 quid. Key factors: Is it all original? (Original pickups, tuners, bridge, finish). Has it been refinished? (Kills value on vintage). Does it play well? Check the serial number to date it, then search completed eBay listings for your model and year. That gives you real market value, not wishful thinking. Or photograph it and <a href="#pageFred" class="text-amber-400 hover:text-amber-300 underline">ask Fred</a>.</div>
+                </div>
+
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">What's a "Lawsuit Era" guitar?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">In the 1970s, Japanese companies like Tokai, Greco, Burny, and Orville made copies of Fender and Gibson guitars that were so good, the American companies sued. These "Lawsuit Era" guitars (roughly 1975-1985) are now collectible in their own right. The craftsmanship was often BETTER than what Gibson and Fender were producing at the time. A Tokai Love Rock from 1980 can be as good as a real Les Paul -- and they're climbing in value. Don't dismiss a Japanese copy. It might be the best guitar you ever play.</div>
+                </div>
+
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">Should I refinish my vintage guitar?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">NO. Please, no. I beg you. A refinished vintage guitar loses 50-70% of its value overnight. That worn, checking, faded finish IS the value. It's called patina, mojo, whatever -- it's proof the guitar is real and has been loved. The only exception is if the guitar is already so damaged that the wood is at risk. Then a sympathetic, period-correct refinish by a specialist might be justified. But if it's just cosmetically rough -- leave it. Clean it, oil the fretboard, set it up properly, and let it be what it is. Every ding is a story.</div>
+                </div>
+
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">Electric or acoustic for a beginner?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">Honestly? Electric. I know that's controversial. People think you should "earn" the electric by learning acoustic first. Nonsense. Electric guitars have thinner necks, lower action, lighter strings, and hurt your fingers less. You'll practice MORE because it's more fun. A decent <a href="https://www.amazon.co.uk/s?k=electric+guitar+starter+pack+beginner&tag=chrisptee-21" target="_blank" class="text-amber-400 hover:text-amber-300 underline">starter pack</a> with guitar, amp, and cable is under 150 quid. But if you want acoustic -- go for it. Just get one with a proper setup. A badly set-up acoustic is the number one reason beginners quit.</div>
+                </div>
+
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">What amp should I get?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">Depends on your budget and where you're playing. For bedroom practice: a <a href="https://www.amazon.co.uk/s?k=boss+katana+mini+guitar+amp&tag=chrisptee-21" target="_blank" class="text-amber-400 hover:text-amber-300 underline">Boss Katana Mini</a> (about 60 quid) or a Blackstar Fly 3. For home and small gigs: Boss Katana 50 (the Swiss army knife of amps). For proper gigging on a budget: Fender Blues Junior or a second-hand Marshall DSL40. Don't spend a fortune until you know what sound you want. And for the love of all that is holy -- try before you buy. What sounds great on YouTube sounds completely different in your bedroom.</div>
+                </div>
+
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">How do I spot a partscaster?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">A "partscaster" is a guitar built from parts from different sources -- sometimes genuine, sometimes aftermarket, sometimes a mix. Nothing wrong with them, but you shouldn't pay Fender prices for one. Check: Does the neck date match the body? (Remove the neck on bolt-ons -- dates are in the heel pocket). Are the pickups original to the model? Is the hardware consistent? Look at the neck pocket -- aftermarket bodies often have sloppy routing or shims. Check the potentiometer date codes (on the back of the pots inside the cavity). If the neck says 1965 but the pots say 2015, you've got a partscaster. Not a bad thing -- just price it right.</div>
+                </div>
+
+                <div class="qa-item p-5" onclick="toggleQA(this)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">Who is Fretboard Fred?</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">I'm a guitar tech from Camden, London. 58 years old, ADHD brain, been taking guitars apart and putting them back together since I was 14. Worked backstage at festivals (Download, Reading, Glastonbury), ran my own repair shop for 15 years, and now I work from my garage because I like the quiet. My '72 Telecaster Deluxe is the love of my life -- butterscotch blonde, original wide-range humbuckers, plays like butter. This village is my way of sharing 44 years of obsession. No guitar snobbery here. A 50 quid Squier that plays well is worth more than a 5000 quid Gibson gathering dust. Play what makes you happy.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="pageFred" class="section-fade mb-12">
+            <h2 class="text-3xl font-black text-white mb-1">&#128295; Ask Fretboard Fred</h2>
+            <p class="text-amber-400 mb-6">Chat with Fred directly. Guitars, amps, pedals, pickups, repairs, authentication -- anything with strings. 24/7.</p>
+
+            <div class="chat-container">
+                <div class="bg-gradient-to-r from-[#78350f] to-[#7c2d12] px-5 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">&#127928;</span>
+                        <div>
+                            <p class="font-bold text-white">Fretboard Fred</p>
+                            <p class="text-amber-300 text-xs">Guitar Tech - Camden - Online</p>
+                        </div>
+                    </div>
+                    <button onclick="clearChat()" class="text-amber-300 hover:text-white text-sm transition" aria-label="Clear chat history">Clear</button>
+                </div>
+
+                <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="Chat with Fretboard Fred"></div>
+
+                <div class="border-t border-amber-900/50 p-3">
+                    <div class="flex gap-2">
+                        <input type="text" id="userInput" placeholder="Ask Fred anything about guitars..." class="flex-1 bg-[#78350f] border border-amber-800 rounded-lg px-4 py-3 text-white placeholder-amber-600 focus:border-amber-400 focus:outline-none" aria-label="Your message to Fretboard Fred" onkeydown="if(event.key==='Enter')sendMessage()">
+                        <button onclick="sendMessage()" id="sendBtn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 rounded-lg transition min-w-[48px]" aria-label="Send message">
+                            <span id="sendText">&#127928;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-amber-700 text-xs text-center mt-3">No guitar snobbery. Fred treats a Squier with the same respect as a '59 Les Paul.</p>
+        </section>
+
+        <section id="pageGear" class="section-fade mb-12">
+            <h2 class="text-3xl font-black text-white mb-1">&#127928; Fred's Picks</h2>
+            <p class="text-amber-400 mb-6">Honest recommendations. Gear I've used, strings I trust, kit that works. No sponsored rubbish.</p>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-8">
+                <div class="bg-amber-900/20 rounded-xl p-6 border border-amber-800/30">
+                    <h3 class="font-bold text-amber-400 mb-3">&#127928; Essentials</h3>
+                    <div class="space-y-2 text-sm">
+                        <a href="https://www.amazon.co.uk/s?k=ernie+ball+regular+slinky+strings&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Ernie Ball Regular Slinky Strings</a>
+                        <a href="https://www.amazon.co.uk/s?k=dunlop+tortex+picks&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Dunlop Tortex Picks</a>
+                        <a href="https://www.amazon.co.uk/s?k=planet+waves+guitar+strap&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Planet Waves Guitar Strap</a>
+                        <a href="https://www.amazon.co.uk/s?k=boss+tu-3+chromatic+tuner&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Boss TU-3 Chromatic Tuner</a>
+                    </div>
+                </div>
+
+                <div class="bg-amber-900/20 rounded-xl p-6 border border-amber-800/30">
+                    <h3 class="font-bold text-amber-400 mb-3">&#128295; Maintenance</h3>
+                    <div class="space-y-2 text-sm">
+                        <a href="https://www.amazon.co.uk/s?k=daddario+guitar+care+kit&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> D'Addario Guitar Care Kit</a>
+                        <a href="https://www.amazon.co.uk/s?k=fender+guitar+stand&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Fender Guitar Stand</a>
+                        <a href="https://www.amazon.co.uk/s?k=guitar+string+winder+cutter+tool&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> String Winder/Cutter Tool</a>
+                        <a href="https://www.amazon.co.uk/s?k=guitar+action+gauge+ruler&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Action Gauge Ruler</a>
+                    </div>
+                </div>
+
+                <div class="bg-amber-900/20 rounded-xl p-6 border border-amber-800/30">
+                    <h3 class="font-bold text-amber-400 mb-3">&#127911; Amps &amp; Pedals</h3>
+                    <div class="space-y-2 text-sm">
+                        <a href="https://www.amazon.co.uk/s?k=boss+katana+50+guitar+amp&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Boss Katana 50 (Best All-Rounder)</a>
+                        <a href="https://www.amazon.co.uk/s?k=boss+ds-1+distortion+pedal&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Boss DS-1 Distortion</a>
+                        <a href="https://www.amazon.co.uk/s?k=tc+electronic+hall+of+fame+reverb&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> TC Electronic Hall of Fame Reverb</a>
+                        <a href="https://www.amazon.co.uk/s?k=vox+ac15+guitar+amp&tag=chrisptee-21" target="_blank" class="block text-amber-200 hover:text-white transition">-> Vox AC15 (Classic Tone)</a>
+                    </div>
+                </div>
+
+                <div class="bg-amber-900/20 rounded-xl p-6 border border-amber-800/30">
+                    <h3 class="font-bold text-amber-400 mb-3">&#128218; Essential Reading</h3>
+                    <div class="space-y-2 text-sm text-amber-200">
+                        <p>-> <strong>The Guitar Handbook</strong> -- Ralph Denyer</p>
+                        <p>-> <strong>Gruhn's Guide to Vintage Guitars</strong> -- George Gruhn</p>
+                        <p>-> <strong>The Tube Amp Book</strong> -- Aspen Pittman</p>
+                        <p>-> <strong>Guitar Player Repair Guide</strong> -- Dan Erlewine</p>
+                        <p>-> <strong>Fender: The Sound Heard 'Round the World</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-amber-900/20 rounded-2xl border border-amber-800/30 overflow-hidden mb-8">
+                <div class="p-5 cursor-pointer" onclick="toggleQA(this.parentElement)">
+                    <div class="qa-question justify-between">
+                        <p class="font-bold text-white">&#127928; The Workshop Code -- Community Rules</p>
+                        <span class="text-amber-400 text-xl ml-2">+</span>
+                    </div>
+                    <div class="qa-answer text-amber-200 text-sm pt-3">
+                        <div class="space-y-2">
+                            <p>1. <strong>Respect the instrument.</strong> Every guitar has a story worth hearing.</p>
+                            <p>2. <strong>No snobbery.</strong> A well-played Squier beats a dusty Custom Shop every time.</p>
+                            <p>3. <strong>Respect each other.</strong> No gatekeeping. Every expert was once a beginner.</p>
+                            <p>4. <strong>Share knowledge freely.</strong> Hoarding information helps nobody.</p>
+                            <p>5. <strong>Buy honest.</strong> If you're selling, disclose everything. No surprises.</p>
+                            <p>6. <strong>Preserve, don't destroy.</strong> Think twice before modifying vintage instruments.</p>
+                            <p>7. <strong>Welcome the weird.</strong> Neurodivergent, odd hours, strange questions -- all welcome. The workbench doesn't judge and neither do we.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-purple-900/30 to-amber-900/20 rounded-2xl p-6 border border-purple-800/30 mb-8">
+                <h3 class="text-xl font-bold text-purple-300 mb-3">&#129504; Got a Noisy Brain?</h3>
+                <p class="text-amber-200 text-sm mb-4">ADHD? Autistic? Both? Welcome home. The founder of the -Oid villages is AuDHD himself. Fred's got ADHD too. Guitar playing and repair is one of the best things for a noisy brain -- repetitive, tactile, absorbing, no small talk required. The workbench doesn't care about your diagnosis. Neither do we. You belong here exactly as you are.</p>
+                <div class="text-amber-300 text-sm space-y-1">
+                    <p>-- Hyperfocus on learning scales? That's a superpower here.</p>
+                    <p>-- Can't sit still? Learn to play standing up -- it's how the pros do it.</p>
+                    <p>-- Sensory overload from crowds? Bedroom recording. Just you, the guitar, and a looper pedal.</p>
+                    <p>-- Need routine? Daily practice is the most rewarding routine you'll ever build.</p>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-amber-900/20 to-yellow-900/20 rounded-2xl p-6 border border-amber-800/30">
+                <h3 class="text-xl font-bold text-amber-400 mb-3">&#127928; Support the Workshop</h3>
+                <p class="text-amber-200 text-sm mb-4">Guit-Oid is free forever. Coffeeware model -- use it, love it, donate if it helps. Every penny keeps the lights on and the soldering iron warm.</p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="https://ko-fi.com/zoom" target="_blank" class="bg-pink-500 hover:bg-pink-600 text-white px-5 py-3 rounded-xl font-bold transition text-sm">Ko-Fi</a>
+                    <a href="https://buymeacoffee.com/chrispteemagician" target="_blank" class="bg-amber-500 hover:bg-amber-600 text-black px-5 py-3 rounded-xl font-bold transition text-sm">BuyMeACoffee</a>
+                    <a href="https://www.tiktok.com/@chrispteemagician" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-3 rounded-xl font-bold transition text-sm">TikTok</a>
+                    <a href="https://www.instagram.com/spicylister" target="_blank" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-5 py-3 rounded-xl font-bold transition text-sm">Instagram</a>
+                </div>
+            </div>
+        </section>
+
+        <div id="leaderboardView" class="hidden">
+            <div class="bg-amber-900/20 rounded-2xl border border-amber-800/30 p-6">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Kudos Leaderboard</h2>
+                <div id="leaderboardList" class="space-y-3"><p class="text-center text-amber-600">Loading...</p></div>
+                <button onclick="switchView('home')" class="w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl transition">Back to Home</button>
+            </div>
+        </div>
+
+        <div id="qrView" class="hidden">
+            <div class="bg-amber-900/20 rounded-2xl border border-amber-800/30 p-6 text-center">
+                <h2 class="text-2xl font-bold text-white mb-4">Your Referral QR Code</h2>
+                <img id="qrImage" src="" alt="QR Code" class="w-64 h-64 mx-auto mb-4 rounded-xl shadow-lg">
+                <p class="text-amber-300 mb-2">Share this to earn <strong>50 kudos</strong> per signup!</p>
+                <button onclick="downloadQR()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-6 rounded-xl transition mb-3">Download QR Code</button>
+                <button onclick="switchView('home')" class="w-full bg-amber-900/30 hover:bg-amber-900/50 text-white font-bold py-3 rounded-xl transition">Back to Home</button>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="quickNav" class="hidden fixed bottom-4 right-4 flex flex-col gap-2 z-30">
+        <button onclick="switchView('leaderboard')" class="bg-[#78350f] hover:bg-amber-900 text-white font-bold py-3 px-4 rounded-full shadow-lg transition border border-amber-800/30">&#127942;</button>
+        <button onclick="switchView('qr')" class="bg-[#78350f] hover:bg-amber-900 text-white font-bold py-3 px-4 rounded-full shadow-lg transition border border-amber-800/30">&#128241;</button>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- MEET — what3words Meeting Point Generator           -->
+    <!-- ================================================== -->
+    <section id="pageMeet" class="bg-[#2a0e04] py-12 border-t border-amber-900/30">
+        <div class="max-w-4xl mx-auto px-4">
+
+            <div style="background: linear-gradient(135deg, #3b1106, #451a03); border: 2px solid #b45309; border-radius: 20px; padding: 32px; margin-bottom: 24px; text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 12px;">📍</div>
+                <h2 style="font-size: 1.8rem; font-weight: 900; color: #fbbf24; margin-bottom: 8px;">Meeting Point Generator</h2>
+                <p style="color: #fcd34d; opacity: 0.8; font-size: 1rem;">At a guitar fair? Tell people exactly where to find you — in three words. Your stand, your van, the entrance. Precise to 3 metres.</p>
+            </div>
+
+            <div style="background: #3b1106; border-radius: 20px; padding: 24px; margin-bottom: 20px; border: 1px solid #78350f;">
+                <h3 style="font-weight: 800; color: white; margin-bottom: 16px; text-align: center; font-size: 1.1rem;">What are you pinning?</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <button onclick="meetGetLocation('🎸 My Stand')" style="min-height:56px; background: linear-gradient(135deg, #b45309, #92400e); color: white; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; font-size: 1rem;" aria-label="Pin my stand location">🎸 My Stand</button>
+                    <button onclick="meetGetLocation('🎵 The Jam Corner')" style="min-height:56px; background: #451a03; color: #fbbf24; border: 2px solid #b45309; font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 1rem;" aria-label="Pin the jam corner location">🎵 The Jam Corner</button>
+                    <button onclick="meetGetLocation('🚗 My Car')" style="min-height:56px; background: transparent; color: #fbbf24; border: 2px solid #b45309; font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 1rem;" aria-label="Pin my car location">🚗 My Car</button>
+                    <button onclick="meetGetLocation('🎪 This Fair')" style="min-height:56px; background: transparent; color: #fbbf24; border: 2px solid #b45309; font-weight: 700; border-radius: 12px; cursor: pointer; font-size: 1rem;" aria-label="Pin this fair location">🎪 This Fair</button>
+                </div>
+            </div>
+
+            <div id="meetLocationCard" class="hidden" style="background: linear-gradient(135deg, #3b1106, #451a03); border: 2px solid #f59e0b; border-radius: 20px; padding: 24px; margin-bottom: 20px;">
+                <p style="font-size: 0.9rem; font-weight: 700; color: #fbbf24; margin-bottom: 4px;" id="meetLabelDisplay">Your location:</p>
+                <p style="font-size: 0.85rem; color: #92400e; margin-bottom: 8px; font-weight: 600;" id="meetCoordsDisplay"></p>
+                <p style="font-size: 2.2rem; font-weight: 900; color: #fbbf24; margin-bottom: 12px; letter-spacing: 0.05em;" id="meetW3W" aria-live="polite">—</p>
+                <a id="meetMapLink" href="#" target="_blank" rel="noopener" style="color: #fbbf24; font-weight: 700;" aria-label="Open on what3words map">Open on what3words map ↗</a>
+                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                    <button onclick="meetCopy()" style="flex:1; min-height:48px; background: linear-gradient(135deg, #b45309, #92400e); color: white; font-weight: 700; border-radius: 12px; border: none; cursor: pointer;" aria-label="Copy what3words address">Copy</button>
+                    <button onclick="meetShare()" style="flex:1; min-height:48px; background: #2a0e04; color: #f5f5f0; border: 2px solid #78350f; font-weight: 700; border-radius: 12px; cursor: pointer;" aria-label="Share what3words address">Share</button>
+                </div>
+            </div>
+
+            <div id="meetQrCard" class="hidden" style="background: #3b1106; border-radius: 20px; padding: 24px; margin-bottom: 20px; text-align: center; border: 1px solid #78350f;">
+                <h3 style="font-weight: 800; color: white; margin-bottom: 12px;">Share via QR</h3>
+                <canvas id="meetQrCanvas" style="border-radius: 12px; max-width: 220px; margin: 0 auto; display: block;"></canvas>
+                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                    <button onclick="meetGenerateQR()" style="flex:1; min-height:48px; background: linear-gradient(135deg, #b45309, #92400e); color: white; font-weight: 700; border-radius: 12px; border: none; cursor: pointer;" aria-label="Generate QR code">Generate QR</button>
+                    <button onclick="meetDownloadQR()" style="flex:1; min-height:48px; background: #2a0e04; color: #f5f5f0; border: 2px solid #78350f; font-weight: 700; border-radius: 12px; cursor: pointer;" aria-label="Download QR code">Download</button>
+                </div>
+            </div>
+
+            <div style="background: #3b1106; border-radius: 20px; padding: 24px; margin-bottom: 20px; border: 1px solid #78350f;">
+                <h3 style="font-weight: 800; color: white; margin-bottom: 12px; font-size: 1.1rem;">Or type a what3words address</h3>
+                <div style="position: relative;">
+                    <input type="text" id="meetManualInput" placeholder="e.g. filled.count.soap"
+                        oninput="meetAutoSuggest(this.value)"
+                        style="width:100%; padding:14px 16px; background:#451a03; border:2px solid #b45309; border-radius:12px; color:#fcd34d; font-size:1rem; min-height:48px; box-sizing:border-box; font-family:inherit;"
+                        aria-label="Enter a what3words address — three words separated by dots"
+                        autocomplete="off" spellcheck="false">
+                    <div id="meetSuggestList" class="hidden" style="position:absolute; z-index:50; width:100%; background:#451a03; border:2px solid #b45309; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.4); margin-top:4px;"></div>
+                </div>
+                <button onclick="meetLookup()" style="width:100%; min-height:56px; background: linear-gradient(135deg, #b45309, #92400e); color:white; font-weight:700; border-radius:12px; border:none; cursor:pointer; font-size:1.05rem; margin-top:12px;" aria-label="Look up this what3words address">Look Up Address</button>
+                <p id="meetManualStatus" class="hidden" style="font-size:0.9rem; margin-top:8px; text-align:center; font-weight:600; color:#fbbf24;" role="status" aria-live="polite"></p>
+            </div>
+
+            <div style="background: #2a0e04; border-radius: 20px; padding: 16px; text-align: center; border: 1px solid #78350f;">
+                <p style="font-size: 0.85rem; color: #92400e;">Powered by <a href="https://what3words.com" target="_blank" rel="noopener" style="color: #fbbf24; font-weight: 700;" aria-label="what3words website">what3words</a> — every 3m² on Earth has a unique 3-word address.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="pageVillage" class="bg-[#3b1106] py-12 border-t border-amber-900/30">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-3xl font-black text-white mb-2 text-center">&#127960;&#65039; The -Oid Villages</h2>
+            <p class="text-amber-400 text-center mb-8">Same AI brain, different expert heads. Each village has its own community of enthusiasts.</p>
+
+            <div class="grid grid-cols-4 md:grid-cols-5 gap-3 mb-8">
+                <a href="https://magic-oid.co.uk" class="bg-amber-900/30 hover:bg-purple-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#127913;</span><span class="block text-xs font-semibold text-purple-400 mt-1">Magic-Oid</span>
+                </a>
+                <a href="https://radi-oid.co.uk" class="bg-amber-900/30 hover:bg-orange-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#128251;</span><span class="block text-xs font-semibold text-orange-400 mt-1">Radi-Oid</span>
+                </a>
+                <a href="https://sail-oid.co.uk" class="bg-amber-900/30 hover:bg-sky-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#9973;</span><span class="block text-xs font-semibold text-sky-400 mt-1">Sail-Oid</span>
+                </a>
+                <a href="https://fish-oid.co.uk" class="bg-amber-900/30 hover:bg-cyan-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#128031;</span><span class="block text-xs font-semibold text-cyan-400 mt-1">Fish-Oid</span>
+                </a>
+                <a href="https://vinyl-oid.co.uk" class="bg-amber-900/30 hover:bg-purple-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#128191;</span><span class="block text-xs font-semibold text-purple-400 mt-1">Vinyl-Oid</span>
+                </a>
+                <a href="https://coin-oid.co.uk" class="bg-amber-900/30 hover:bg-yellow-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#129689;</span><span class="block text-xs font-semibold text-yellow-400 mt-1">Coin-Oid</span>
+                </a>
+                <a href="https://watch-oid.co.uk" class="bg-amber-900/30 hover:bg-cyan-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#8986;</span><span class="block text-xs font-semibold text-cyan-400 mt-1">Watch-Oid</span>
+                </a>
+                <a href="https://camera-oid.co.uk" class="bg-amber-900/30 hover:bg-orange-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#128247;</span><span class="block text-xs font-semibold text-orange-400 mt-1">Camera-Oid</span>
+                </a>
+                <a href="https://stamp-oid.co.uk" class="bg-amber-900/30 hover:bg-rose-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#128238;</span><span class="block text-xs font-semibold text-rose-400 mt-1">Stamp-Oid</span>
+                </a>
+                <a href="https://cannabin-oid.co.uk" class="bg-amber-900/30 hover:bg-green-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#127807;</span><span class="block text-xs font-semibold text-green-400 mt-1">Cannabin-Oid</span>
+                </a>
+                <div class="bg-amber-800/40 border-2 border-amber-400/50 rounded-xl p-3 text-center">
+                    <span class="text-2xl">&#127928;</span><span class="block text-xs font-bold text-amber-300 mt-1">YOU'RE HERE!</span>
+                </div>
+                <a href="https://designer-oid.co.uk" class="bg-amber-900/30 hover:bg-rose-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#128087;</span><span class="block text-xs font-semibold text-rose-400 mt-1">Designer-Oid</span>
+                </a>
+                <a href="https://miniature-oid.co.uk" class="bg-amber-900/30 hover:bg-indigo-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#128269;</span><span class="block text-xs font-semibold text-indigo-400 mt-1">Miniature-Oid</span>
+                </a>
+                <a href="https://spicylister.com" class="bg-amber-900/30 hover:bg-red-900/30 border border-amber-800/30 rounded-xl p-3 text-center transition">
+                    <span class="text-2xl">&#127798;&#65039;</span><span class="block text-xs font-semibold text-red-400 mt-1">SpicyLister</span>
+                </a>
+            </div>
+
+            <h3 class="text-lg font-bold text-center text-amber-400 mb-4">The Family</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-8">
+                <a href="https://comedymagic.co.uk" class="bg-amber-900/20 border border-amber-800/20 rounded-lg p-2 text-center hover:bg-amber-900/40 transition">
+                    <span class="text-xl">&#127917;</span><span class="block text-xs text-amber-500 mt-1">Comedy Magic</span>
+                </a>
+                <a href="https://docstrange.co.uk" class="bg-amber-900/20 border border-amber-800/20 rounded-lg p-2 text-center hover:bg-amber-900/40 transition">
+                    <span class="text-xl">&#129504;</span><span class="block text-xs text-amber-500 mt-1">Doc Strange</span>
+                </a>
+                <a href="https://chrisptee.co.uk" class="bg-amber-900/20 border border-amber-800/20 rounded-lg p-2 text-center hover:bg-amber-900/40 transition">
+                    <span class="text-xl">&#127913;</span><span class="block text-xs text-amber-500 mt-1">Chris P Tee</span>
+                </a>
+                <a href="https://feelfamous.com" class="bg-amber-900/20 border border-amber-800/20 rounded-lg p-2 text-center hover:bg-amber-900/40 transition">
+                    <span class="text-xl">&#11088;</span><span class="block text-xs text-amber-500 mt-1">FeelFamous</span>
+                </a>
+                <a href="https://strangemole.co.uk" class="bg-amber-900/20 border border-amber-800/20 rounded-lg p-2 text-center hover:bg-amber-900/40 transition">
+                    <span class="text-xl">&#128371;&#65039;</span><span class="block text-xs text-amber-500 mt-1">Strange Mole</span>
+                </a>
+                <a href="https://jackmingus.co.uk" class="bg-amber-900/20 border border-amber-800/20 rounded-lg p-2 text-center hover:bg-amber-900/40 transition">
+                    <span class="text-xl">&#127930;</span><span class="block text-xs text-amber-500 mt-1">Jack Mingus</span>
+                </a>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 20px; padding: 32px; margin-bottom: 32px; text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 8px;">🏘️</div>
+                <h3 style="font-size: 1.3rem; font-weight: 800; color: white; margin-bottom: 8px;">Run Your Own Guit-Oid Village</h3>
+                <p style="font-size: 0.9rem; color: rgba(255,255,255,0.9); margin-bottom: 16px; max-width: 480px; margin-left: auto; margin-right: auto;">Got a stall, a shop, or guitar expertise worth sharing? Get your own hamlet — your page, your QR code, your corner of the village.</p>
+                <a href="https://magic-oid.co.uk/hamlet/signup" style="display:inline-block; background:white; color:#92400e; font-weight:700; padding:14px 32px; border-radius:12px; text-decoration:none; min-height:48px; line-height:1.2;" aria-label="Claim your hamlet in the Guit-Oid village">Claim Your Hamlet</a>
+            </div>
+
+            <div class="bg-amber-900/20 rounded-2xl border border-amber-800/30 p-8 mb-8">
+                <h3 class="text-2xl font-black text-white mb-4 text-center">Join the Village</h3>
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-amber-900/30 rounded-xl p-6 text-center border border-amber-800/30">
+                        <p class="text-3xl mb-2">&#127928;</p>
+                        <p class="font-bold text-white text-lg">Free</p>
+                        <p class="text-amber-400 font-bold text-xl mb-2">Forever</p>
+                        <p class="text-amber-300 text-sm">AI identification, learn section, Q&amp;A, chatbot. No limits, no ads, no catch.</p>
+                    </div>
+                    <div class="bg-gradient-to-b from-amber-900/30 to-yellow-900/30 rounded-xl p-6 text-center border-2 border-amber-500/50">
+                        <p class="text-3xl mb-2">&#11088;</p>
+                        <p class="font-bold text-white text-lg">Founder Villager</p>
+                        <p class="text-amber-400 font-bold text-xl mb-2">&pound;27/year</p>
+                        <p class="text-amber-300 text-sm">PRO across ALL villages, hamlet access, priority support, kudos multiplier. Price locked forever.</p>
+                    </div>
+                    <div class="bg-gradient-to-b from-purple-900/30 to-amber-900/30 rounded-xl p-6 text-center border-2 border-purple-500/50">
+                        <p class="text-3xl mb-2">&#128081;</p>
+                        <p class="font-bold text-white text-lg">Founder Master</p>
+                        <p class="text-amber-400 font-bold text-xl mb-2">&pound;97/year</p>
+                        <p class="text-amber-300 text-sm">Everything above plus: custom hamlet, dealer berth, early access to new villages, direct line to Chris.</p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <a href="https://www.patreon.com/chrisptee" target="_blank" class="inline-block bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold transition" aria-label="Join on Patreon">Join on Patreon</a>
+                </div>
+            </div>
+
+            <div class="text-center mb-4">
+                <h3 class="text-lg font-bold text-white mb-3">Get in Touch</h3>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <a href="https://wa.me/447976884254" class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-bold transition text-sm">WhatsApp Chris</a>
+                    <a href="mailto:chris@chrisptee.co.uk" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-3 rounded-xl font-bold transition text-sm">Email Chris</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-[#2a0f02] py-10 border-t border-amber-900/20">
+        <div class="max-w-4xl mx-auto text-center px-4">
+            <h3 class="text-lg font-bold text-amber-400 mb-3">Standing on the Shoulders of Giants</h3>
+            <p class="text-sm text-amber-600 mb-4">Leo Fender - Les Paul - Jim Marshall - Seth Lover - Ted McCarty - Lloyd Loar - C.F. Martin - Orville Gibson - Dan Erlewine</p>
+            <p class="font-hand text-xl text-amber-400 mb-4">"The guitar is a small orchestra." -- Andres Segovia</p>
+            <div class="flex flex-wrap gap-3 justify-center mb-4">
+                <a href="https://buymeacoffee.com/chrispteemagician" class="text-amber-400 hover:text-amber-300 text-sm transition">BuyMeACoffee</a>
+                <a href="https://ko-fi.com/zoom" class="text-pink-400 hover:text-pink-300 text-sm transition">Ko-Fi</a>
+                <a href="https://wa.me/447976884254" class="text-green-400 hover:text-green-300 text-sm transition">WhatsApp</a>
+                <a href="https://feelfamous.com" class="text-amber-400 hover:text-amber-300 text-sm transition">FeelFamous</a>
+            </div>
+            <p class="text-xs text-amber-700 mb-1">
+                Built with &#10084;&#65039; by <a href="https://chrisptee.co.uk" class="text-amber-500 hover:text-amber-400">Chris P Tee</a> -
+                Part of <a href="https://feelfamous.com" class="text-amber-500 hover:text-amber-400">FeelFamous.com</a> -
+                Fretboard Fred's Guitar Workshop
+            </p>
+            <p class="text-xs text-amber-800 mb-2">World Domination Through Kindness. One ember at a time.</p>
+            <p class="text-xs text-amber-900">Compass mapped. Forge built. Ember sparked. &#127928;</p>
+        </div>
+    </footer>
+
+    <canvas id="resultCanvas" class="hidden"></canvas>
+
+    <script>
+        const CONFIG = {
+            oidName: 'Guit-Oid',
+            oidSlug: 'guitars',
+            primaryColor: '#92400e',
+            loadingIcon: '\u{1F3B8}',
+            supabaseUrl: 'https://pdnjeynugptnavkdbmxh.supabase.co',
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkbmpleW51Z3B0bmF2a2RibXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTEzMDAsImV4cCI6MjA4NDU4NzMwMH0.GawisR01EykMtdauBMxenmHF2NXDMzDOJl8WgzkwFQo',
+            adminEmails: ['chris@chrisptee.co.uk', 'chris@chrisptee.com', 'glowgadgets@gmail.com']
+        };
+
+        const { createClient } = supabase;
+        const supabaseClient = createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+
+        // ===== PATREON AUTH =====
+        const PATREON_CLIENT_ID = 'A-K7cVCZBl7mQZDlrq0obIq7Jm0RPYAMGstfBsUyEeX-5e6WvU24ZWMTGBuypxot';
+        const PATREON_OAUTH_URL = `https://www.patreon.com/oauth2/authorize?response_type=code&client_id=${PATREON_CLIENT_ID}&redirect_uri=https://guit-oid.co.uk/auth/patreon&scope=identity%20identity.memberships`;
+
+        // ===== w3w =====
+        const W3W_API_KEY = 'R7VL7Q93';
+        let patreonSession = null;
+        let meetCurrentW3W = '';
+        let meetCurrentLabel = '';
+        let meetAutoSuggestTimer = null;
+
+        let currentUser = null;
+        let currentResult = null;
+        let userQRCode = null;
+
+        async function compressImage(file, maxSize = 800, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let { width, height } = img;
+                        if (width > maxSize || height > maxSize) {
+                            if (width > height) { height = (height / width) * maxSize; width = maxSize; }
+                            else { width = (width / height) * maxSize; height = maxSize; }
+                        }
+                        canvas.width = width; canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve({ base64: dataUrl.split(',')[1], dataUrl });
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function parseAmazonSearch(description) {
+            const match = description.match(/AMAZON_SEARCH:\s*(.+?)(\n|$)/i);
+            if (match) {
+                const searchTerm = match[1].trim();
+                const cleanDesc = description.replace(/AMAZON_SEARCH:\s*.+?(\n|$)/i, '').trim();
+                return { searchTerm, cleanDesc };
+            }
+            return { searchTerm: null, cleanDesc: description };
+        }
+
+        const patientMessages = [
+            "Checking the serial numbers...",
+            "Consulting the neck pocket...",
+            "Scanning the headstock...",
+            "Examining pickup configuration...",
+            "Cross-referencing guitar databases...",
+            "Checking the truss rod cover...",
+            "Inspecting the bridge hardware...",
+            "Analysing the fret markers...",
+            "Consulting the workshop logbook...",
+            "Examining the tuner brands...",
+            "Reading the pot date codes...",
+            "Noting the body contours...",
+            "Almost there, patience pays off...",
+            "The AI is being thorough, not fast..."
+        ];
+        let messageIndex = 0;
+        let loadingStartTime = 0;
+        let loadingTimerInterval = null;
+
+        function updateLoadingMessage(customMsg) {
+            const msgEl = document.getElementById('loadingMessage');
+            if (customMsg) { msgEl.textContent = customMsg; }
+            else { msgEl.textContent = patientMessages[messageIndex % patientMessages.length]; messageIndex++; }
+        }
+
+        function startLoadingTimer() {
+            loadingStartTime = Date.now();
+            messageIndex = 0;
+            const timerEl = document.getElementById('loadingTimer');
+            loadingTimerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - loadingStartTime) / 1000);
+                timerEl.textContent = elapsed + 's';
+                if (elapsed > 0 && elapsed % 4 === 0) updateLoadingMessage();
+            }, 1000);
+        }
+
+        function stopLoadingTimer() {
+            if (loadingTimerInterval) { clearInterval(loadingTimerInterval); loadingTimerInterval = null; }
+        }
+
+        async function fetchWithRetry(url, options, maxRetries = 4) {
+            let lastError;
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    const response = await fetch(url, options);
+                    const data = await response.json();
+                    if (data.error && (response.status === 429 || response.status === 503)) {
+                        if (attempt < maxRetries) {
+                            const waitTime = Math.pow(2, attempt) * 3000;
+                            updateLoadingMessage('Heavy traffic... waiting ' + (waitTime/1000) + 's then trying again');
+                            await new Promise(resolve => setTimeout(resolve, waitTime));
+                            continue;
+                        }
+                    }
+                    return data;
+                } catch (error) {
+                    lastError = error;
+                    if (error.name === 'AbortError') throw error;
+                    if (attempt < maxRetries) {
+                        const waitTime = Math.pow(2, attempt) * 3000;
+                        updateLoadingMessage('Signal lost... trying again in ' + (waitTime/1000) + 's');
+                        await new Promise(resolve => setTimeout(resolve, waitTime));
+                    }
+                }
+            }
+            throw lastError;
+        }
+
+        function checkAgeVerification() {
+            if (!localStorage.getItem('ageVerified')) {
+                document.getElementById('ageModal').classList.remove('hidden');
+            }
+        }
+
+        function confirmAge(type) {
+            localStorage.setItem('ageVerified', type);
+            localStorage.setItem('ageVerifiedDate', new Date().toISOString());
+            document.getElementById('ageModal').classList.add('hidden');
+            if (type === 'under18') {
+                alert('Please ask your parent or guardian to sign up with you. They can create an account and add you as a supervised user.');
+            }
+        }
+
+        async function checkUser() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) { currentUser = session.user; await loadUserData(); showUserStatus(); }
+        }
+
+        async function loadUserData() {
+            if (!currentUser) return;
+            try {
+                let { data: userData, error } = await supabaseClient
+                    .from('users').select('*').eq('id', currentUser.id).single();
+                if (error || !userData) {
+                    const { data: newUser } = await supabaseClient
+                        .from('users').insert([{ id: currentUser.id, email: currentUser.email, username: currentUser.email.split('@')[0], kudos: 0, oid_memberships: [CONFIG.oidSlug] }])
+                        .select().single();
+                    userData = newUser;
+                } else {
+                    if (!userData.oid_memberships.includes(CONFIG.oidSlug)) {
+                        await supabaseClient.from('users').update({ oid_memberships: [...userData.oid_memberships, CONFIG.oidSlug] }).eq('id', currentUser.id);
+                    }
+                }
+                const oidCount = userData.oid_memberships.length;
+                let badge = 'Villager';
+                if (oidCount >= 5) badge = 'Pollinator';
+                else if (oidCount >= 2) badge = 'Bridge Walker';
+                document.getElementById('userName').textContent = '@' + userData.username;
+                document.getElementById('userBadge').textContent = badge;
+                document.getElementById('userKudos').textContent = userData.kudos || 0;
+                await generateQRCode();
+            } catch (error) { console.error('Error loading user data:', error); }
+        }
+
+        function showUserStatus() {
+            document.getElementById('userStatusBar').classList.remove('hidden');
+            document.getElementById('quickNav').classList.remove('hidden');
+            document.getElementById('signInPrompt')?.classList.add('hidden');
+        }
+
+        // ===== PATREON FUNCTIONS =====
+        function signInWithPatreon() {
+            window.location.href = PATREON_OAUTH_URL;
+        }
+
+        function restorePatreonSession() {
+            try {
+                const raw = localStorage.getItem('guitoid_patreon_session');
+                if (!raw) return;
+                const stored = JSON.parse(raw);
+                if (Date.now() > stored.expiresAt) {
+                    localStorage.removeItem('guitoid_patreon_session');
+                    return;
+                }
+                patreonSession = stored;
+                showPatreonStatus();
+            } catch (e) { console.warn('restorePatreonSession:', e); }
+        }
+
+        async function handlePatreonCallback() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            if (!code) return;
+            try {
+                const res = await fetch(`/.netlify/functions/patreon-auth?code=${encodeURIComponent(code)}`);
+                if (!res.ok) throw new Error('auth failed');
+                const data = await res.json();
+                const session = { isPro: data.isPro, tier: data.tier, expiresAt: Date.now() + 86400000 };
+                localStorage.setItem('guitoid_patreon_session', JSON.stringify(session));
+                patreonSession = session;
+                showPatreonStatus();
+                window.history.replaceState({}, '', '/');
+            } catch (e) { console.warn('handlePatreonCallback:', e); }
+        }
+
+        function showPatreonStatus() {
+            if (!patreonSession) return;
+            const el = document.getElementById('patreonStatus');
+            if (el) {
+                el.classList.remove('hidden');
+                if (patreonSession.isPro) {
+                    el.innerHTML = `<span class="text-green-400 font-bold">✓ Patreon ${patreonSession.tier || 'member'} — Pro unlocked</span>`;
+                } else {
+                    el.innerHTML = `<span class="text-amber-400">Signed in — <a href="https://www.patreon.com/chrisptee" target="_blank" class="text-amber-300 font-semibold underline">upgrade for Pro</a></span>`;
+                }
+            }
+            const btn = document.getElementById('patreonSignInBtn');
+            if (btn) btn.classList.add('hidden');
+            const signInPrompt = document.getElementById('signInPrompt');
+            if (signInPrompt && patreonSession.isPro) signInPrompt.classList.add('hidden');
+        }
+
+        // (legacy signUpOrIn kept as no-op to avoid any stale onclick refs)
+        async function signUpOrIn(emailId, passwordId, formId, successId) {
+            signInWithPatreon();
+        }
+
+        async function _legacySignUpOrInBody(emailId, passwordId, formId, successId) {
+            const email = document.getElementById(emailId).value.trim();
+            const password = document.getElementById(passwordId).value;
+            if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+            if (!password || password.length < 6) { alert('Password must be at least 6 characters.'); return; }
+            const form = document.getElementById(formId);
+            const btn = form.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = 'Signing in...'; btn.disabled = true;
+            try {
+                const { data: signInData, error: signInError } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (!signInError && signInData.session) {
+                    document.getElementById(formId).classList.add('hidden');
+                    document.getElementById(successId).classList.remove('hidden');
+                    currentUser = signInData.session.user;
+                    await loadUserData(); showUserStatus(); return;
+                }
+                const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({ email, password });
+                if (signUpError) {
+                    if (signUpError.message.includes('already registered')) { alert('Account exists but password is wrong. Try again or WhatsApp Chris.'); }
+                    else { alert('Error: ' + signUpError.message); }
+                    return;
+                }
+                if (signUpData.session) {
+                    document.getElementById(formId).classList.add('hidden');
+                    document.getElementById(successId).classList.remove('hidden');
+                    currentUser = signUpData.session.user;
+                    await loadUserData(); showUserStatus();
+                } else {
+                    document.getElementById(formId).classList.add('hidden');
+                    document.getElementById(successId).classList.remove('hidden');
+                    document.getElementById(successId).innerHTML = '<p class="font-bold text-green-400">Check your email!</p><p class="text-sm mt-1 text-amber-300">Click the confirmation link to complete sign up.</p>';
+                }
+            } catch (e) { alert('Error: ' + (e.message || e)); }
+            finally { btn.textContent = originalText; btn.disabled = false; }
+        }
+
+        async function signOut() { await supabaseClient.auth.signOut(); currentUser = null; location.reload(); }
+
+        async function generateQRCode() {
+            if (!currentUser) return;
+            const referralUrl = window.location.origin + '?ref=' + currentUser.id;
+            userQRCode = await QRCode.toDataURL(referralUrl, { width: 300, color: { dark: CONFIG.primaryColor, light: '#ffffff' } });
+            document.getElementById('qrImage').src = userQRCode;
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const { data } = await supabaseClient.from('users').select('username, created_at').order('created_at', { ascending: false }).limit(5);
+                if (data && data.length > 0) {
+                    document.getElementById('activityList').innerHTML = data.map(user =>
+                        '<p>' + CONFIG.loadingIcon + ' <strong>' + user.username + '</strong> joined the village!</p>'
+                    ).join('');
+                } else {
+                    document.getElementById('activityList').innerHTML = '<p class="text-center text-amber-600">Be the first to join!</p>';
+                }
+            } catch (error) { console.error('Error loading activity:', error); }
+        }
+
+        async function awardKudos(amount, reason) {
+            if (!currentUser) return;
+            try {
+                await supabaseClient.rpc('increment_kudos', { user_id: currentUser.id, amount: amount });
+                await supabaseClient.from('kudos_transactions').insert([{ user_id: currentUser.id, amount: amount, reason: reason }]);
+            } catch (error) { console.error('Kudos error:', error); }
+        }
+
+        function getYouTubeEmbedUrl(url) {
+            if (!url) return '';
+            let videoId = '';
+            if (url.includes('youtube.com/shorts/')) videoId = url.split('youtube.com/shorts/')[1].split('?')[0];
+            else if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
+            else if (url.includes('youtube.com/watch')) videoId = new URLSearchParams(url.split('?')[1]).get('v');
+            else if (url.includes('youtube.com/embed/')) videoId = url.split('youtube.com/embed/')[1].split('?')[0];
+            return videoId ? 'https://www.youtube.com/embed/' + videoId : url;
+        }
+
+        async function loadBroadcast() {
+            try {
+                const { data } = await supabaseClient.from('broadcast').select('*').eq('is_active', true).limit(1).single();
+                if (!data) return;
+                document.getElementById('broadcastVideo').src = getYouTubeEmbedUrl(data.video_url);
+                document.getElementById('broadcastTitle').textContent = data.title || 'Village Broadcast';
+                document.getElementById('broadcastSection').classList.remove('hidden');
+                if (data.is_emergency) document.getElementById('emergencyBanner').classList.remove('hidden');
+            } catch (e) { console.log('Broadcast not available'); }
+        }
+
+        function switchTab(tab) {
+            const identifyView = document.getElementById('identifyView');
+            const roastView = document.getElementById('roastView');
+            const identifyTab = document.getElementById('identifyTab');
+            const roastTab = document.getElementById('roastTab');
+            if (tab === 'identify') {
+                identifyView.classList.remove('hidden'); roastView.classList.add('hidden');
+                identifyTab.className = 'flex-1 py-3 rounded-xl tab-active transition font-semibold';
+                roastTab.className = 'flex-1 py-3 rounded-xl tab-inactive transition font-semibold';
+            } else {
+                identifyView.classList.add('hidden'); roastView.classList.remove('hidden');
+                identifyTab.className = 'flex-1 py-3 rounded-xl tab-inactive transition font-semibold';
+                roastTab.className = 'flex-1 py-3 rounded-xl tab-active transition font-semibold';
+            }
+        }
+
+        function switchLearnTab(tab) {
+            document.getElementById('learnGuitarid').classList.add('hidden');
+            document.getElementById('learnBasics').classList.add('hidden');
+            document.getElementById('learnFakes').classList.add('hidden');
+            document.getElementById('learnTab1').className = 'learn-tab-inactive px-4 py-2 transition text-sm';
+            document.getElementById('learnTab2').className = 'learn-tab-inactive px-4 py-2 transition text-sm';
+            document.getElementById('learnTab3').className = 'learn-tab-inactive px-4 py-2 transition text-sm';
+            if (tab === 'guitarid') {
+                document.getElementById('learnGuitarid').classList.remove('hidden');
+                document.getElementById('learnTab1').className = 'learn-tab-active px-4 py-2 transition text-sm';
+            } else if (tab === 'basics') {
+                document.getElementById('learnBasics').classList.remove('hidden');
+                document.getElementById('learnTab2').className = 'learn-tab-active px-4 py-2 transition text-sm';
+            } else {
+                document.getElementById('learnFakes').classList.remove('hidden');
+                document.getElementById('learnTab3').className = 'learn-tab-active px-4 py-2 transition text-sm';
+            }
+        }
+
+        function switchView(view) {
+            const leaderboard = document.getElementById('leaderboardView');
+            const qr = document.getElementById('qrView');
+            leaderboard.classList.add('hidden'); qr.classList.add('hidden');
+            if (view === 'leaderboard') { leaderboard.classList.remove('hidden'); leaderboard.scrollIntoView({ behavior: 'smooth' }); loadLeaderboard(); }
+            else if (view === 'qr') { qr.classList.remove('hidden'); qr.scrollIntoView({ behavior: 'smooth' }); }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const { data } = await supabaseClient.from('users').select('username, kudos, oid_memberships').order('kudos', { ascending: false }).limit(10);
+                if (data) {
+                    document.getElementById('leaderboardList').innerHTML = data.map((user, i) => {
+                        const oidCount = user.oid_memberships.length;
+                        let badge = '\u{1F3B8}';
+                        if (oidCount >= 5) badge = '\u{1F41D}';
+                        else if (oidCount >= 2) badge = '\u{1F309}';
+                        return '<div class="flex items-center justify-between bg-amber-900/30 p-4 rounded-xl">' +
+                            '<div class="flex items-center gap-3">' +
+                            '<span class="text-2xl font-bold text-amber-400">#' + (i + 1) + '</span>' +
+                            '<span>' + badge + '</span>' +
+                            '<span class="font-bold text-white">@' + user.username + '</span>' +
+                            '</div>' +
+                            '<span class="text-amber-400 font-bold">' + user.kudos + ' kudos</span>' +
+                            '</div>';
+                    }).join('');
+                }
+            } catch (error) { console.error('Error loading leaderboard:', error); }
+        }
+
+        async function handleUpload(mode, input) {
+            const file = input.files[0];
+            if (!file) return;
+            ['identifyView', 'roastView'].forEach(v => document.getElementById(v).classList.add('hidden'));
+            document.getElementById('loadingView').classList.remove('hidden');
+            startLoadingTimer();
+            try {
+                const { base64, dataUrl } = await compressImage(file, 800, 0.7);
+                updateLoadingMessage('Tuning up...');
+                const data = await fetchWithRetry('/.netlify/functions/analyze-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64, mode: mode, oidType: CONFIG.oidSlug, userId: currentUser?.id })
+                }, 4);
+                if (data.error) { stopLoadingTimer(); alert(data.description || 'Analysis failed.'); resetToHome(); return; }
+                currentResult = { mode: mode, image: dataUrl, ...data };
+                showResult(currentResult);
+                if (currentUser) {
+                    await awardKudos(10, 'Image analysis');
+                    document.getElementById('kudosEarned').classList.remove('hidden');
+                    document.getElementById('signInPrompt').classList.add('hidden');
+                    await loadUserData();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                stopLoadingTimer();
+                alert(error.name === 'AbortError' ? 'Request timed out. Try again.' : 'Error analyzing image. Please try again.');
+                resetToHome();
+            }
+            input.value = '';
+        }
+
+        function showResult(result) {
+            stopLoadingTimer();
+            document.getElementById('loadingView').classList.add('hidden');
+            document.getElementById('resultView').classList.remove('hidden');
+            document.getElementById('resultImage').src = result.image;
+            document.getElementById('resultTitle').textContent = result.title || 'Identified!';
+            const { searchTerm, cleanDesc } = parseAmazonSearch(result.description || '');
+            document.getElementById('resultDescription').textContent = cleanDesc;
+            const amazonLinkDiv = document.getElementById('amazonLink');
+            const amazonBtn = document.getElementById('amazonBtn');
+            if (searchTerm) {
+                const amazonUrl = 'https://www.amazon.co.uk/s?k=' + encodeURIComponent(searchTerm) + '&tag=chrisptee-21';
+                amazonBtn.href = amazonUrl;
+                amazonBtn.innerHTML = '\u{1F3B8} Find "' + searchTerm + '" on Amazon';
+                amazonLinkDiv.classList.remove('hidden');
+            } else { amazonLinkDiv.classList.add('hidden'); }
+            const priceEl = document.getElementById('resultPrice');
+            if (result.price) { priceEl.textContent = 'Est. Value: ' + result.price; priceEl.classList.remove('hidden'); }
+            else { priceEl.classList.add('hidden'); }
+            document.getElementById('resultAttribution').textContent = currentUser
+                ? 'Identified by @' + currentUser.email.split('@')[0]
+                : 'Identified by ' + CONFIG.oidName;
+        }
+
+        function resetToHome() {
+            document.getElementById('resultView').classList.add('hidden');
+            document.getElementById('loadingView').classList.add('hidden');
+            document.getElementById('identifyView').classList.remove('hidden');
+            document.getElementById('kudosEarned')?.classList.add('hidden');
+            currentResult = null;
+            ['cameraInput', 'galleryInput', 'roastCamera', 'roastGallery'].forEach(id => {
+                const input = document.getElementById(id); if (input) input.value = '';
+            });
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            let lineCount = 0;
+            const maxLines = 6;
+            for (let word of words) {
+                const testLine = line + word + ' ';
+                if (ctx.measureText(testLine).width > maxWidth && line) {
+                    ctx.fillText(line.trim(), x, y); line = word + ' '; y += lineHeight; lineCount++;
+                    if (lineCount >= maxLines) { ctx.fillText('...', x, y); return; }
+                } else { line = testLine; }
+            }
+            ctx.fillText(line.trim(), x, y);
+        }
+
+        async function shareResult() {
+            if (!currentResult) return;
+            const canvas = document.getElementById('resultCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1080; canvas.height = 1350;
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#92400e'); gradient.addColorStop(1, '#b45309');
+            ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const img = new Image();
+            img.onload = async () => {
+                const scale = Math.min(800 / img.width, 500 / img.height);
+                const w = img.width * scale; const h = img.height * scale;
+                const x = (canvas.width - w) / 2; const y = 80;
+                ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 20;
+                ctx.drawImage(img, x, y, w, h); ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fbbf24'; ctx.textAlign = 'center';
+                ctx.font = 'bold 48px Outfit, sans-serif';
+                ctx.fillText(currentResult.title || 'Guit-Oid', canvas.width / 2, y + h + 70);
+                const { cleanDesc } = parseAmazonSearch(currentResult.description || '');
+                ctx.fillStyle = 'white'; ctx.font = '24px Outfit, sans-serif';
+                wrapText(ctx, cleanDesc.substring(0, 300), canvas.width / 2, y + h + 120, 900, 35);
+                ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 32px Outfit, sans-serif';
+                ctx.fillText('guit-oid.co.uk', canvas.width / 2, canvas.height - 80);
+                if (navigator.share && navigator.canShare) {
+                    try {
+                        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                        const file = new File([blob], 'guit-oid-result.png', { type: 'image/png' });
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({ title: currentResult.title || 'Guit-Oid Result', text: 'Check out what Guit-Oid identified! guit-oid.co.uk', files: [file] });
+                            return;
+                        }
+                    } catch (e) { if (e.name !== 'AbortError') console.log('Share failed:', e); }
+                }
+                try {
+                    await navigator.clipboard.writeText('Check out Guit-Oid - AI guitar identification! guit-oid.co.uk');
+                    alert('Link copied! Share it at the workshop.');
+                } catch (e) { alert('Share: guit-oid.co.uk'); }
+            };
+            img.src = currentResult.image;
+        }
+
+        async function downloadResult() {
+            if (!currentResult) return;
+            const canvas = document.getElementById('resultCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1080; canvas.height = 1350;
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#92400e'); gradient.addColorStop(1, '#b45309');
+            ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const img = new Image();
+            img.onload = () => {
+                const scale = Math.min(800 / img.width, 500 / img.height);
+                const w = img.width * scale; const h = img.height * scale;
+                const x = (canvas.width - w) / 2; const y = 80;
+                ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 20;
+                ctx.drawImage(img, x, y, w, h); ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 48px Outfit, sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText(currentResult.title || CONFIG.oidName, canvas.width / 2, y + h + 70);
+                const { cleanDesc } = parseAmazonSearch(currentResult.description || '');
+                ctx.fillStyle = 'white'; ctx.font = '28px Outfit, sans-serif';
+                wrapText(ctx, cleanDesc.substring(0, 350), canvas.width / 2, y + h + 120, 900, 38);
+                ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 32px Outfit, sans-serif';
+                ctx.fillText('guit-oid.co.uk', canvas.width / 2, canvas.height - 80);
+                const link = document.createElement('a');
+                link.download = 'guit-oid-result.png'; link.href = canvas.toDataURL('image/png'); link.click();
+            };
+            img.src = currentResult.image;
+        }
+
+        function downloadQR() {
+            if (!userQRCode) return;
+            const link = document.createElement('a');
+            link.download = CONFIG.oidName + '-referral-qr.png'; link.href = userQRCode; link.click();
+        }
+
+        let chatHistory = [];
+        let isChatLoading = false;
+        const RATE_LIMIT_MS = 2000;
+        let lastMessageTime = 0;
+
+        const savedChat = localStorage.getItem('fred_chat_history');
+        if (savedChat) { try { chatHistory = JSON.parse(savedChat); } catch(e) { chatHistory = []; } }
+
+        function initChat() {
+            renderMessages();
+            if (chatHistory.length === 0) {
+                addFredMessage("Workshop's open! I'm Fred \u2014 44 years fixing, collecting, and playing guitars. Ask me anything about guitars, amps, pedals, or that mystery axe in your attic. No guitar snobbery here. \u{1F3B8}");
+            }
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = chatHistory.map(msg =>
+                '<div class="mb-3 flex ' + (msg.role === 'user' ? 'justify-end' : 'justify-start') + '">' +
+                '<div class="' + (msg.role === 'user' ? 'msg-user' : 'msg-fred') + ' p-4 text-sm text-white whitespace-pre-wrap">' + escapeHtml(msg.text) + '</div>' +
+                '</div>'
+            ).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addFredMessage(text) {
+            chatHistory.push({ role: 'fred', text });
+            localStorage.setItem('fred_chat_history', JSON.stringify(chatHistory.slice(-50)));
+            renderMessages();
+        }
+
+        function addUserMessage(text) {
+            chatHistory.push({ role: 'user', text });
+            localStorage.setItem('fred_chat_history', JSON.stringify(chatHistory.slice(-50)));
+            renderMessages();
+        }
+
+        function showTyping() {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.id = 'typing'; div.className = 'mb-3 flex justify-start';
+            div.innerHTML = '<div class="msg-fred p-4"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+            container.appendChild(div); container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+
+        async function sendMessage() {
+            if (isChatLoading) return;
+            const now = Date.now();
+            if (now - lastMessageTime < RATE_LIMIT_MS) return;
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = ''; lastMessageTime = now; isChatLoading = true;
+            document.getElementById('sendBtn').disabled = true;
+            document.getElementById('sendText').textContent = '...';
+            addUserMessage(text); showTyping();
+            try {
+                const recentHistory = chatHistory.slice(-6).map(m => ({ role: m.role === 'user' ? 'user' : 'model', text: m.text }));
+                const response = await fetch('/.netlify/functions/chat-fred', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: text, history: recentHistory })
+                });
+                removeTyping();
+                const data = await response.json();
+                if (data.reply) { addFredMessage(data.reply); }
+                else { addFredMessage("Sorry, got a bit tangled in my strings there. Ask me again?"); }
+            } catch (err) {
+                removeTyping();
+                addFredMessage("Something went wrong \u2014 might be your connection. Give it another go in a sec.");
+            }
+            isChatLoading = false;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('sendText').textContent = '\u{1F3B8}';
+        }
+
+        function clearChat() {
+            if (!confirm('Clear chat history?')) return;
+            chatHistory = []; localStorage.removeItem('fred_chat_history'); renderMessages();
+            addFredMessage("Fresh start! Right then, what can I help you with?");
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div'); div.textContent = text; return div.innerHTML;
+        }
+
+        function toggleQA(item) {
+            const answer = item.querySelector('.qa-answer');
+            const icon = item.querySelector('.qa-question span:last-child');
+            if (!answer) return;
+            const isOpen = answer.classList.contains('open');
+            document.querySelectorAll('.qa-answer').forEach(a => a.classList.remove('open'));
+            document.querySelectorAll('.qa-question span:last-child').forEach(s => { if (s.textContent === '\u2212') s.textContent = '+'; });
+            if (!isOpen) { answer.classList.add('open'); if (icon) icon.textContent = '\u2212'; }
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+
+        const dotNavLinks = document.querySelectorAll('.dot-nav a');
+        const sections = document.querySelectorAll('[id^="page"]');
+        const dotObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    dotNavLinks.forEach(link => link.classList.remove('active'));
+                    const activeLink = document.querySelector('.dot-nav a[href="#' + entry.target.id + '"]');
+                    if (activeLink) activeLink.classList.add('active');
+                }
+            });
+        }, { threshold: 0.3 });
+        sections.forEach(section => dotObserver.observe(section));
+
+        window.onload = async function() {
+            // UI first — always safe
+            checkAgeVerification();
+            loadBroadcast();
+            initChat();
+
+            // Patreon callback + session restore
+            restorePatreonSession();
+            if (window.location.search.includes('code=') && window.location.pathname.includes('/auth/patreon')) {
+                await handlePatreonCallback();
+            }
+
+            // Supabase auth — wrapped so a Supabase hiccup never breaks the page
+            try {
+                await checkUser();
+                await loadRecentActivity();
+            } catch (e) {
+                console.warn('Supabase init skipped:', e);
+            }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref');
+        if (refCode) localStorage.setItem('referredBy', refCode);
+
+        // ===== MEET — what3words =====
+        async function meetGetLocation(label) {
+            meetCurrentLabel = label;
+            const card = document.getElementById('meetLocationCard');
+            const w3wEl = document.getElementById('meetW3W');
+            const coordsEl = document.getElementById('meetCoordsDisplay');
+            const labelEl = document.getElementById('meetLabelDisplay');
+            if (card) card.classList.remove('hidden');
+            if (labelEl) labelEl.textContent = label + ':';
+            if (w3wEl) { w3wEl.textContent = 'Finding location…'; w3wEl.setAttribute('aria-label', 'Finding your location'); }
+            if (coordsEl) coordsEl.textContent = '';
+            if (!navigator.geolocation) { if (w3wEl) w3wEl.textContent = 'Geolocation not available'; return; }
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const { latitude: lat, longitude: lng } = pos.coords;
+                if (coordsEl) coordsEl.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                try {
+                    const res = await fetch(`https://api.what3words.com/v3/convert-to-3wa?coordinates=${lat},${lng}&language=en&format=json&key=${W3W_API_KEY}`);
+                    const data = await res.json();
+                    if (data.words) {
+                        meetCurrentW3W = data.words;
+                        if (w3wEl) { w3wEl.textContent = '///' + data.words; w3wEl.setAttribute('aria-label', 'Your what3words address is: ' + data.words); }
+                        document.getElementById('meetMapLink').href = `https://what3words.com/${data.words}`;
+                        document.getElementById('meetQrCard')?.classList.remove('hidden');
+                        meetGenerateQR();
+                    } else { if (w3wEl) w3wEl.textContent = 'Could not get address'; }
+                } catch (e) { if (w3wEl) w3wEl.textContent = 'Network error — try again'; }
+            }, () => { if (w3wEl) w3wEl.textContent = 'Location denied — use manual entry below'; }, { enableHighAccuracy: true, timeout: 10000 });
+        }
+
+        function meetCopy() {
+            if (!meetCurrentW3W) return;
+            const text = `${meetCurrentLabel}: ///${meetCurrentW3W} — https://what3words.com/${meetCurrentW3W}`;
+            navigator.clipboard.writeText(text).then(() => alert('Copied!')).catch(() => alert(text));
+        }
+
+        function meetShare() {
+            if (!meetCurrentW3W) return;
+            const text = meetCurrentLabel ? `${meetCurrentLabel}: ///${meetCurrentW3W} — https://what3words.com/${meetCurrentW3W}` : `///${meetCurrentW3W} — https://what3words.com/${meetCurrentW3W}`;
+            if (navigator.share) { navigator.share({ title: 'Meet me here', text, url: `https://what3words.com/${meetCurrentW3W}` }).catch(() => {}); }
+            else { navigator.clipboard.writeText(text).then(() => alert('Link copied!')).catch(() => alert(text)); }
+        }
+
+        function meetGenerateQR() {
+            if (!meetCurrentW3W) return;
+            const canvas = document.getElementById('meetQrCanvas');
+            if (!canvas) return;
+            QRCode.toCanvas(canvas, `https://what3words.com/${meetCurrentW3W}`, { width: 220, color: { dark: '#b45309', light: '#2a0e04' } }, (err) => { if (err) console.warn('QR error:', err); });
+        }
+
+        function meetDownloadQR() {
+            const canvas = document.getElementById('meetQrCanvas');
+            if (!canvas) return;
+            const link = document.createElement('a');
+            link.download = `guit-oid-meet-${meetCurrentW3W || 'location'}.png`;
+            link.href = canvas.toDataURL(); link.click();
+        }
+
+        function meetAutoSuggest(value) {
+            clearTimeout(meetAutoSuggestTimer);
+            const list = document.getElementById('meetSuggestList');
+            if (!value || value.length < 3) { if (list) list.classList.add('hidden'); return; }
+            meetAutoSuggestTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`https://api.what3words.com/v3/autosuggest?input=${encodeURIComponent(value)}&key=${W3W_API_KEY}`);
+                    const data = await res.json();
+                    if (!list) return;
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        list.innerHTML = data.suggestions.slice(0, 5).map(s =>
+                            `<div onclick="meetSelectSuggestion('${s.words}')" style="padding:12px 16px; cursor:pointer; border-bottom:1px solid #78350f; font-weight:600; color:#fbbf24; min-height:44px; display:flex; align-items:center;">
+                                <span style="color:#b45309; margin-right:6px;">///</span>${s.words}
+                                <span style="font-size:0.75rem; color:#92400e; margin-left:auto;">${s.nearestPlace || ''}</span>
+                            </div>`
+                        ).join('');
+                        list.classList.remove('hidden');
+                    } else { list.classList.add('hidden'); }
+                } catch (e) { console.warn('autosuggest:', e); }
+            }, 280);
+        }
+
+        function meetSelectSuggestion(words) {
+            document.getElementById('meetManualInput').value = words;
+            document.getElementById('meetSuggestList')?.classList.add('hidden');
+            meetLookup();
+        }
+
+        async function meetLookup() {
+            const input = document.getElementById('meetManualInput').value.trim().replace(/^\/\/\//, '');
+            const status = document.getElementById('meetManualStatus');
+            if (!input || !input.includes('.')) {
+                if (status) { status.textContent = 'Enter three words separated by dots'; status.classList.remove('hidden'); } return;
+            }
+            if (status) { status.textContent = 'Looking up…'; status.classList.remove('hidden'); }
+            try {
+                const res = await fetch(`https://api.what3words.com/v3/convert-to-coordinates?words=${encodeURIComponent(input)}&key=${W3W_API_KEY}`);
+                const data = await res.json();
+                if (data.coordinates) {
+                    meetCurrentW3W = input;
+                    document.getElementById('meetLocationCard')?.classList.remove('hidden');
+                    const w3wEl = document.getElementById('meetW3W');
+                    if (w3wEl) { w3wEl.textContent = '///' + input; w3wEl.setAttribute('aria-label', 'what3words address: ' + input); }
+                    document.getElementById('meetMapLink').href = `https://what3words.com/${input}`;
+                    document.getElementById('meetCoordsDisplay').textContent = `${data.coordinates.lat.toFixed(5)}, ${data.coordinates.lng.toFixed(5)}`;
+                    document.getElementById('meetQrCard')?.classList.remove('hidden');
+                    meetGenerateQR();
+                    if (status) status.classList.add('hidden');
+                } else { if (status) { status.textContent = 'Address not found — check the three words'; status.classList.remove('hidden'); } }
+            } catch (e) { if (status) { status.textContent = 'Network error — try again'; status.classList.remove('hidden'); } }
+        }
+    </script>
+</body>
+</html>
