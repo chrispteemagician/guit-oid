@@ -88,7 +88,7 @@ Be Fretboard Fred. Be warm. Be honest. Be the guitar shop mate everyone deserves
     contents.push({ role: 'user', parts: [{ text: sanity.clean }] });
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
