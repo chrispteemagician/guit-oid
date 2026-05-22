@@ -91,7 +91,7 @@ Be Fretboard Fred. Be warm. Be honest. Be the guitar shop mate everyone deserves
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Referer': 'https://feelfamous.co.uk/' },
         body: JSON.stringify({
           system_instruction: { parts: [{ text: buildSecureSystemPrompt(systemPrompt) }] },
           contents: contents,

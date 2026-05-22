@@ -154,8 +154,9 @@ Format as JSON:
 
     const systemPrompt = mode === 'roast' ? roastPrompt : identifyPrompt;
 
+    const mimeType = (image.match(/^data:(image\/\w+);base64,/) || [])[1] || 'image/jpeg';
     const rawImage = image.replace(/^data:image\/\w+;base64,/, '');
-    logImageMeta('guit-oid', 'image/jpeg', rawImage.length);
+    logImageMeta('guit-oid', mimeType, rawImage.length);
     const { cleaned: cleanImage } = stripExifFromJpeg(rawImage);
     const securedPrompt = buildSecureSystemPrompt(systemPrompt);
 
@@ -173,7 +174,7 @@ Format as JSON:
               { text: mode === 'roast' ? 'Roast this guitar.' : 'Identify this guitar.' },
               {
                 inline_data: {
-                  mime_type: "image/jpeg",
+                  mime_type: mimeType,
                   data: cleanImage
                 }
               }
