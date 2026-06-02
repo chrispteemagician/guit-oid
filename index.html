@@ -141,6 +141,40 @@
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
         :focus-visible { outline: 2px solid var(--highlight); outline-offset: 2px; }
+    
+        /* BUG REPORT WIDGET */
+        .bug-btn {
+            position: fixed; bottom: 18px; right: 18px; z-index: 9999;
+            background: #1c1917; color: #fff; border: none; border-radius: 20px;
+            padding: 8px 14px; font-size: .78rem; font-weight: 700;
+            cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.3);
+            display: flex; align-items: center; gap: 6px; font-family: inherit;
+            opacity: .7; transition: opacity .2s;
+        }
+        .bug-btn:hover { opacity: 1; }
+        .bug-modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+            z-index: 10000; align-items: center; justify-content: center; padding: 16px;
+        }
+        .bug-modal-overlay.open { display: flex; }
+        .bug-modal {
+            background: #fff; border-radius: 16px; padding: 24px;
+            max-width: 380px; width: 100%; font-family: inherit;
+        }
+        .bug-modal h3 { margin: 0 0 4px; font-size: 1rem; color: #1c1917; }
+        .bug-modal p { margin: 0 0 14px; font-size: .8rem; color: #78716c; }
+        .bug-modal label { display: block; font-size: .8rem; font-weight: 700; color: #1c1917; margin-bottom: 4px; }
+        .bug-modal input, .bug-modal textarea {
+            width: 100%; border: 1.5px solid #e7e5e4; border-radius: 8px;
+            padding: 8px 10px; font-size: .85rem; font-family: inherit;
+            margin-bottom: 12px; box-sizing: border-box; resize: vertical;
+        }
+        .bug-modal input:focus, .bug-modal textarea:focus { outline: none; border-color: #fb923c; }
+        .bug-modal-footer { display: flex; gap: 8px; justify-content: flex-end; }
+        .bug-cancel { background: none; border: 1.5px solid #e7e5e4; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-size: .85rem; font-family: inherit; }
+        .bug-submit { background: #1c1917; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-size: .85rem; font-weight: 700; font-family: inherit; }
+        .bug-submit:disabled { opacity: .5; cursor: not-allowed; }
+        .bug-success { color: #16a34a; font-size: .85rem; text-align: center; margin-top: 8px; }
     </style>
 </head>
 <body>
@@ -1732,5 +1766,40 @@
             } catch (e) { if (status) { status.textContent = 'Network error — try again'; status.classList.remove('hidden'); } }
         }
     </script>
+
+<!-- BUG REPORT WIDGET -->
+<button class="bug-btn" onclick="document.getElementById('bugModal').classList.add('open')">🐛 Found a bug?</button>
+<div class="bug-modal-overlay" id="bugModal">
+  <div class="bug-modal">
+    <h3>🐛 Report a broken page</h3>
+    <p>Found something broken? Tell us. If we didn't know about it, you get a free month of Villager.</p>
+    <label>What's broken?</label>
+    <textarea id="bugDesc" rows="3" placeholder="Describe what's not working..."></textarea>
+    <label>Your email <span style="font-weight:400;color:#a8a29e">(optional — needed for your free month)</span></label>
+    <input type="email" id="bugEmail" placeholder="you@example.com">
+    <div class="bug-modal-footer">
+      <button class="bug-cancel" onclick="document.getElementById('bugModal').classList.remove('open')">Cancel</button>
+      <button class="bug-submit" id="bugSubmitBtn" onclick="submitBugReport()">Send report</button>
+    </div>
+    <div class="bug-success hidden" id="bugSuccess">Thanks! We'll check it out. 🙌</div>
+  </div>
+</div>
+<script>
+async function submitBugReport() {
+  const desc = document.getElementById('bugDesc').value.trim();
+  if (!desc) return;
+  const btn = document.getElementById('bugSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    await fetch('https://www.spicylister.com/.netlify/functions/bug-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: window.location.href, description: desc, email: document.getElementById('bugEmail').value.trim() || null })
+    });
+    document.getElementById('bugSuccess').classList.remove('hidden');
+    setTimeout(() => document.getElementById('bugModal').classList.remove('open'), 2000);
+  } catch(e) { btn.disabled = false; btn.textContent = 'Send report'; }
+}
+</script>
 </body>
 </html>
