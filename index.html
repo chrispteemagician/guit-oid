@@ -1172,6 +1172,9 @@
             const params = new URLSearchParams(window.location.search);
             const code = params.get('code');
             if (!code) return;
+            // Patreon codes are single-use — strip it before the async exchange so a
+            // reload or slow mobile round-trip can never resubmit the same code.
+            window.history.replaceState({}, '', '/');
             try {
                 const res = await fetch(`/.netlify/functions/patreon-auth?code=${encodeURIComponent(code)}`);
                 if (!res.ok) throw new Error('auth failed');
@@ -1180,7 +1183,6 @@
                 localStorage.setItem('guitoid_patreon_session', JSON.stringify(session));
                 patreonSession = session;
                 showPatreonStatus();
-                window.history.replaceState({}, '', '/');
             } catch (e) { console.warn('handlePatreonCallback:', e); }
         }
 
