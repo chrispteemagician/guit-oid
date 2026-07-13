@@ -338,6 +338,11 @@
                     <button onclick="resetToHome()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-xl transition text-sm">Again</button>
                 </div>
 
+                <div id="honestyBox" class="bg-amber-900/10 border border-amber-800/30 rounded-2xl p-5 text-center mb-4">
+                    <p class="text-amber-200 text-sm leading-relaxed">Free, always will be — that's not changing. That identification just now cost real money to run. Tell a mate who'd use it too, or pay it forward some other way. That's genuinely enough.</p>
+                    <p id="honestyAsk" class="text-amber-400 text-sm mt-2">If you'd rather say thanks with money: a one-off <a href="https://buymeacoffee.com/chrispteemagician" target="_blank" class="text-amber-300 font-bold underline hover:text-amber-200">buy me a coffee</a> covers it, or <a href="https://www.patreon.com/chrisptee" target="_blank" class="text-amber-300 font-bold underline hover:text-amber-200">Patreon</a> if you want to be a regular. Nothing here was ever locked behind it.</p>
+                </div>
+
                 <div id="signInPrompt" class="bg-[#451a03] border-2 border-amber-700 rounded-2xl p-6 text-center">
                     <p class="text-amber-200 font-semibold mb-2">Sign in to earn kudos, track your identifications, and unlock village features!</p>
                     <p class="text-sm text-amber-500 mb-4">One login — works across every -Oid app.</p>
@@ -1415,6 +1420,8 @@
             document.getElementById('resultAttribution').textContent = currentUser
                 ? 'Identified by @' + currentUser.email.split('@')[0]
                 : 'Identified by ' + CONFIG.oidName;
+            const honestyAsk = document.getElementById('honestyAsk');
+            if (honestyAsk) honestyAsk.classList.toggle('hidden', !!(patreonSession && patreonSession.isPro));
         }
 
         function resetToHome() {
