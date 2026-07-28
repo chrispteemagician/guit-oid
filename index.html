@@ -1234,8 +1234,9 @@
             try {
                 const { data } = await supabaseClient.from('users').select('username, created_at').order('created_at', { ascending: false }).limit(5);
                 if (data && data.length > 0) {
+                    // escaped: username is member-submitted (derived from signup email, but insertable directly via anon key) — stored XSS risk on this public activity feed otherwise
                     document.getElementById('activityList').innerHTML = data.map(user =>
-                        '<p>' + CONFIG.loadingIcon + ' <strong>' + user.username + '</strong> joined the village!</p>'
+                        '<p>' + CONFIG.loadingIcon + ' <strong>' + escapeHtml(user.username) + '</strong> joined the village!</p>'
                     ).join('');
                 } else {
                     document.getElementById('activityList').innerHTML = '<p class="text-center text-amber-600">Be the first to join!</p>';
@@ -1328,7 +1329,7 @@
                             '<div class="flex items-center gap-3">' +
                             '<span class="text-2xl font-bold text-amber-400">#' + (i + 1) + '</span>' +
                             '<span>' + badge + '</span>' +
-                            '<span class="font-bold text-white">@' + user.username + '</span>' +
+                            '<span class="font-bold text-white">@' + escapeHtml(user.username) + '</span>' +
                             '</div>' +
                             '<span class="text-amber-400 font-bold">' + user.kudos + ' kudos</span>' +
                             '</div>';
@@ -1382,7 +1383,8 @@
             if (searchTerm) {
                 const amazonUrl = 'https://www.amazon.co.uk/s?k=' + encodeURIComponent(searchTerm) + '&tag=chrisptee-21';
                 amazonBtn.href = amazonUrl;
-                amazonBtn.innerHTML = '\u{1F3B8} Find "' + searchTerm + '" on Amazon';
+                // escaped: searchTerm comes from the Gemini image-analysis response — an attacker-crafted image (prompt injection) could otherwise inject HTML here
+                amazonBtn.innerHTML = '\u{1F3B8} Find "' + escapeHtml(searchTerm) + '" on Amazon';
                 amazonLinkDiv.classList.remove('hidden');
             } else { amazonLinkDiv.classList.add('hidden'); }
             const priceEl = document.getElementById('resultPrice');
