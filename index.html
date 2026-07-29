@@ -928,7 +928,7 @@
                 Part of <a href="https://feelfamous.co.uk" class="text-amber-500 hover:text-amber-400">FeelFamous</a> -
                 Fretboard Fred's Guitar Workshop
             </p>
-            <p class="text-xs text-amber-800 mb-2">World Domination Through Kindness. One ember at a time.</p>
+            <p class="text-xs text-amber-800 mb-2">Just trying to be useful. One ember at a time.</p>
             <p class="text-xs text-amber-900">Compass mapped. Forge built. Ember sparked. &#127928;</p>
         </div>
     
@@ -1168,9 +1168,9 @@
             if (el) {
                 el.classList.remove('hidden');
                 if (patreonSession.isPro) {
-                    el.innerHTML = `<span class="text-green-400 font-bold">✓ Patreon ${patreonSession.tier || 'member'} — Pro unlocked</span>`;
+                    el.innerHTML = `<span class="text-green-400 font-bold">✓ Patreon ${patreonSession.tier || 'member'} — thanks for being a supporter</span>`;
                 } else {
-                    el.innerHTML = `<span class="text-amber-400">Signed in — <a href="https://www.patreon.com/chrisptee" target="_blank" class="text-amber-300 font-semibold underline">upgrade for Pro</a></span>`;
+                    el.innerHTML = `<span class="text-amber-400">Signed in — <a href="https://www.patreon.com/chrisptee" target="_blank" class="text-amber-300 font-semibold underline">join the village</a></span>`;
                 }
             }
             const btn = document.getElementById('patreonSignInBtn');
