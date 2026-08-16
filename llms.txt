@@ -1,0 +1,31 @@
+# Guit-Oid
+
+> Free AI-powered identification tool for guitars, amps, pedals, and pickups — "if it's got strings and a story." Upload a photo and Guit-Oid identifies it, or roasts it. Ask Fretboard Fred anything about setup, repair, spotting a fake, or what that attic find is actually worth. Part of the FeelFamous -Oid Ecosystem.
+
+Live at: https://guit-oid.co.uk
+
+## Core tool (free, no sign-in required)
+
+- Identify mode: photo in, make/model/era/value out.
+- Roast My Guitar mode: same upload flow, honest opinions from Fretboard Fred instead of a formal verdict.
+- Ask Fred — a chatbot voiced as a 58-year-old guitar tech who's been setting up and repairing guitars since he was 14, ran a repair shop in Camden, now fixes guitars from his garage. Free-form workshop-voice chat about setup, repair, spotting a fake, or what an attic find is worth.
+
+The identification tool, roast mode, and Ask Fred are all free forever, with no sign-in wall and no paid tier required.
+
+## Membership (Patreon — optional, supports hosting, does not gate the tool)
+
+- Villager — £4.95/month
+- Elder — earned, not bought
+- Founder — £14.95/month
+
+Membership funds a hosted hut/hamlet page, kudos, leaderboard and activity feed — none of it is required to use the identification tool or Ask Fred.
+
+## Contact
+
+- Email: chris@chrisptee.co.uk
+- Patreon: https://www.patreon.com/chrisptee
+- One-off support: https://buymeacoffee.com/chrispteemagician
+
+## About
+
+Built by Chris P Taylor (Doc Strange), part of the wider FeelFamous -Oid ecosystem of free AI identification tools.
