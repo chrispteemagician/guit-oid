@@ -12,7 +12,21 @@ fake, or what that attic find is actually worth.
 
 Part of the FeelFamous -Oid Ecosystem.
 
-**Live at:** guit-oid.co.uk | **Netlify:** auto-deploy on push to main
+**Live at:** guitar-oid.netlify.app — confirmed 2026-08-18: Chris tested
+guit-oid.co.uk directly and it does not resolve, despite Netlify's project
+record showing it as the attached primary domain (same trap as
+miniature-oid — attached in Netlify's dashboard is not the same as DNS
+actually pointing there). The real working URL is the site's own Netlify
+subdomain, which is `guitar-oid.netlify.app` (the Netlify project itself is
+named "guitar-oid", not "guit-oid"). Don't reintroduce `guit-oid.co.uk` in
+canonical/OG tags, robots.txt/sitemap.xml, share text, or cross-links
+elsewhere in the ecosystem until DNS is confirmed actually working.
+**Exception, left alone deliberately:** `index.html`'s `PATREON_OAUTH_URL`
+still uses `guit-oid.co.uk/auth/patreon` as its `redirect_uri` — that must
+match whatever's registered in the Patreon developer dashboard, which
+wasn't visible this session. Confirm/update the registered Redirect URI
+before changing that one line, or Patreon sign-in will break.
+**Netlify:** auto-deploy on push to main
 
 ---
 

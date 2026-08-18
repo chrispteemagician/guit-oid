@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>The Guitar Workshop | Guit-Oid — Fretboard Fred's Guitar World</title>
     <meta name="description" content="Fretboard Fred's Guitar Workshop. Guitar authentication meets repair wisdom. Identify guitars, learn the craft, ask anything. Free forever.">
-    <link rel="canonical" href="https://guit-oid.co.uk/">
+    <link rel="canonical" href="https://guitar-oid.netlify.app/">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Guit-Oid">
     <meta property="og:title" content="The Guitar Workshop | Guit-Oid — Fretboard Fred's Guitar World">
     <meta property="og:description" content="Fretboard Fred's Guitar Workshop. Guitar authentication meets repair wisdom. Identify guitars, learn the craft, ask anything. Free forever.">
-    <meta property="og:url" content="https://guit-oid.co.uk/">
+    <meta property="og:url" content="https://guitar-oid.netlify.app/">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="The Guitar Workshop | Guit-Oid — Fretboard Fred's Guitar World">
     <meta name="twitter:description" content="Fretboard Fred's Guitar Workshop. Guitar authentication meets repair wisdom. Identify guitars, learn the craft, ask anything. Free forever.">
@@ -21,7 +21,7 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "Guit-Oid",
-      "url": "https://guit-oid.co.uk/",
+      "url": "https://guitar-oid.netlify.app/",
       "description": "Free AI-powered identification tool for guitars, amps, pedals, and pickups. Upload a photo and Guit-Oid identifies it, or roasts it. Ask Fretboard Fred anything about setup, repair, spotting a fake, or what that attic find is actually worth.",
       "applicationCategory": "LifestyleApplication",
       "operatingSystem": "Any",
@@ -985,6 +985,10 @@
 
         // ===== PATREON AUTH =====
         const PATREON_CLIENT_ID = 'A-K7cVCZBl7mQZDlrq0obIq7Jm0RPYAMGstfBsUyEeX-5e6WvU24ZWMTGBuypxot';
+        // NOT changed to guitar-oid.netlify.app despite the domain fix elsewhere on this page (2026-08-18 audit) —
+        // this redirect_uri must match whatever's registered in the Patreon developer dashboard for this app,
+        // which this session can't see. Changing it here without also updating Patreon's app settings would
+        // break sign-in. Flag to Chris: confirm/update the registered Patreon Redirect URI before changing this line.
         const PATREON_OAUTH_URL = `https://www.patreon.com/oauth2/authorize?response_type=code&client_id=${PATREON_CLIENT_ID}&redirect_uri=https://guit-oid.co.uk/auth/patreon&scope=identity%20identity.memberships`;
 
         // ===== w3w =====
@@ -1471,21 +1475,21 @@
                 ctx.fillStyle = 'white'; ctx.font = '24px Outfit, sans-serif';
                 wrapText(ctx, cleanDesc.substring(0, 300), canvas.width / 2, y + h + 120, 900, 35);
                 ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 32px Outfit, sans-serif';
-                ctx.fillText('guit-oid.co.uk', canvas.width / 2, canvas.height - 80);
+                ctx.fillText('guitar-oid.netlify.app', canvas.width / 2, canvas.height - 80);
                 if (navigator.share && navigator.canShare) {
                     try {
                         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                         const file = new File([blob], 'guit-oid-result.png', { type: 'image/png' });
                         if (navigator.canShare({ files: [file] })) {
-                            await navigator.share({ title: currentResult.title || 'Guit-Oid Result', text: 'Check out what Guit-Oid identified! guit-oid.co.uk', files: [file] });
+                            await navigator.share({ title: currentResult.title || 'Guit-Oid Result', text: 'Check out what Guit-Oid identified! guitar-oid.netlify.app', files: [file] });
                             return;
                         }
                     } catch (e) { if (e.name !== 'AbortError') console.log('Share failed:', e); }
                 }
                 try {
-                    await navigator.clipboard.writeText('Check out Guit-Oid - AI guitar identification! guit-oid.co.uk');
+                    await navigator.clipboard.writeText('Check out Guit-Oid - AI guitar identification! guitar-oid.netlify.app');
                     alert('Link copied! Share it at the workshop.');
-                } catch (e) { alert('Share: guit-oid.co.uk'); }
+                } catch (e) { alert('Share: guitar-oid.netlify.app'); }
             };
             img.src = currentResult.image;
         }
@@ -1511,7 +1515,7 @@
                 ctx.fillStyle = 'white'; ctx.font = '28px Outfit, sans-serif';
                 wrapText(ctx, cleanDesc.substring(0, 350), canvas.width / 2, y + h + 120, 900, 38);
                 ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 32px Outfit, sans-serif';
-                ctx.fillText('guit-oid.co.uk', canvas.width / 2, canvas.height - 80);
+                ctx.fillText('guitar-oid.netlify.app', canvas.width / 2, canvas.height - 80);
                 const link = document.createElement('a');
                 link.download = 'guit-oid-result.png'; link.href = canvas.toDataURL('image/png'); link.click();
             };

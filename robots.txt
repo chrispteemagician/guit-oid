@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://guit-oid.co.uk/sitemap.xml
+Sitemap: https://guitar-oid.netlify.app/sitemap.xml
